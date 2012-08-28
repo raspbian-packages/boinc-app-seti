@@ -1,0 +1,55 @@
+Source: boinc-app-seti
+Section: science
+Priority: extra
+Maintainer: Debian BOINC Maintainers <pkg-boinc-devel@lists.alioth.debian.org>
+Uploaders: Steffen Moeller <moeller@debian.org>,
+ Guo Yixuan <culu.gyx@gmail.com>
+DM-Upload-Allowed: yes
+Standards-Version: 3.9.3
+Build-Depends: debhelper (>= 7.0.50~), automake1.9 (>= 1.9.3),
+ autoconf (>= 2.59),
+ boinc-dev (>= 7) | libboinc-app-dev,
+ libfftw3-dev
+Vcs-Git: git://git.debian.org/git/pkg-boinc/boinc-app-seti.git
+Vcs-Browser: http://git.debian.org/?p=pkg-boinc/boinc-app-seti.git
+Homepage: http://setiathome.berkeley.edu/
+
+Package: boinc-app-seti
+Architecture: any
+Depends: ${misc:Depends},${shlibs:Depends}, boinc-client (>= 5.4.3-1)
+Suggests: boinc-manager
+Description: SETI@home application for the BOINC client
+ SETI@home is a distributed computing project using Internet-connected
+ computers for the Search for Extraterrestrial Intelligence (SETI). It
+ searches for possible evidence of extraterrestrial intelligence in
+ radio transmissions collected by the Arecibo radio telescope.
+ .
+ This package contains the SETI@home Enhanced application for the BOINC
+ distributed computing platform. The BOINC client downloads the radio
+ data which the SETI@home application analyzes looking for signals of
+ extraterrestrial origin. Results are then send back to the SETI@home
+ server by the BOINC client.
+ .
+ Note that this package has been primarily created for users of
+ architectures for which SETI@home does not provide its application.
+ If your architecture is x86 or AMD64 the BOINC client automatically
+ downloads the latest SETI@home application if you participate in this
+ project. There is no need to install this package then, except for
+ it to take all technical hurdles from you to have your very custom
+ SETI patch or new compiler flags evaluated. The configuration of
+ BOINC to find the local SETI binary is all performed by the package.
+
+Package: boinc-app-seti-dbg
+Architecture: any
+Depends: ${misc:Depends}, boinc-app-seti (= ${binary:Version})
+Section: debug
+Description: debug symbols for SETI@home
+ SETI@home is a distributed computing project using Internet-connected
+ computers for the Search for Extraterrestrial Intelligence (SETI). It
+ searches for possible evidence of extraterrestrial intelligence in
+ radio transmissions collected by the Arecibo radio telescope.
+ .
+ This package provide debug information. It comes handy when you have
+ optimised the code of SETI yourself and find it crash or be stuck in
+ an infinite loop or you may be asked to install the package for some
+ joint investigation with the SETI core developers.

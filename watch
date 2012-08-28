@@ -1,0 +1,4 @@
+# The SETI@home project does not distribute source code releases as
+# tarballs, only tarballs of nightly Subversion snapshots are available.
+# Therefore a proper debian/watch file is not very useful under these
+# circumstances.

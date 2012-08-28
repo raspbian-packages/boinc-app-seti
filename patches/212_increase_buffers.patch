@@ -1,0 +1,39 @@
+Index: boinc-app-seti/client/seti.cpp
+===================================================================
+--- boinc-app-seti.orig/client/seti.cpp	2012-08-28 11:10:30.000000000 +0800
++++ boinc-app-seti/client/seti.cpp	2012-08-28 11:20:31.904438000 +0800
+@@ -844,10 +844,11 @@
+   unsigned long nbytes, nsamples,samples_per_byte;
+   sah_complex *data;
+   unsigned long i;
+-  char *p, buf[256];
++  char *p, buf[2560];
+   sah_complex *bin_data=0;
+   int retval=0;
+   FORCE_FRAME_POINTER;
++  buf[0]=0;
+ 
+   nsamples = swi.nsamples;
+   samples_per_byte=(8/swi.bits_per_sample);
+@@ -859,7 +860,7 @@
+   switch(swi.data_type) {
+     case DATA_ASCII:
+       for (i=0; i<nsamples; i++) {
+-        p = fgets(buf, 256, f);
++        p = fgets(buf, sizeof(buf), f);
+         if (!p) {
+           SETIERROR(READ_FAILED,"in seti_parse_data");
+         }
+Index: boinc-app-seti/tools/workunit_resample.cpp
+===================================================================
+--- boinc-app-seti.orig/tools/workunit_resample.cpp	2012-08-24 13:34:04.000000000 +0800
++++ boinc-app-seti/tools/workunit_resample.cpp	2012-08-28 11:20:31.904438000 +0800
+@@ -62,7 +62,7 @@
+ workunit_header header;
+ 
+ int main(int argc, char *argv[]) {
+-  char *outfile=NULL, buf[256];
++  char *outfile=NULL, buf[2560];
+   struct stat statbuf;
+   int nbytes,nread,nsamples;
+   std::string tmpbuf("");

@@ -1,0 +1,11 @@
+#002_disable_static_linkage.patch
+003_dont_use_own_jpeglib.patch
+101_freebsd_build.patch
+#102_powerpc_altivec.patch
+210_fix_fgets_warning.patch
+211_give_stderr_some_output.patch
+212_increase_buffers.patch
+omitting_archs.patch
+004_disable_altivec_on_ppc_linux.patch
+const_warning_reduction.patch
+worker_comments.patch

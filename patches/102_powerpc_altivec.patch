@@ -1,0 +1,11 @@
+--- a/client/Makefile.am
++++ b/client/Makefile.am
+@@ -165,7 +165,7 @@
+ seti_boinc-analyzeFuncs_altivec.o:  vector/analyzeFuncs_altivec.cpp
+ 	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+ 	$(CPPFLAGS) $(seti_boinc_CXXFLAGS) $(CXXFLAGS) -DUSE_ALTIVEC \
+-	-MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -faltivec \
++	-MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -maltivec \
+ 	-c -o $@ $<; then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
+ 	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+ seti_boinc-analyzeFuncs_vector.o:  vector/analyzeFuncs_vector.cpp
