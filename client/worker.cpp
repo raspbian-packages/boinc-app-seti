@@ -114,7 +114,7 @@ static int read_wu_state() {
         fclose(f);
         if (retval) SETIERROR(retval,"from seti_parse_wu() in read_wu_state()");
     } else {
-	char msg[1024];
+	char msg[MAXPATHLEN+50];
 	sprintf(msg,"(%s) in read_wu_state() errno=%d\n",path.c_str(),errno);
 	SETIERROR(FOPEN_FAILED,msg);
     }
@@ -144,15 +144,19 @@ void worker() {
   __asm__ __volatile__ ("andl $-16, %esp");
 #endif
   try {
+    fprintf(stderr,"I: worker() - common_init\n");
     retval = common_init();
     if (retval) SETIERROR(retval,"from common_init() in worker()");
 
+    fprintf(stderr,"I: worker() - read_wu_state\n");
     retval = read_wu_state();
     if (retval) SETIERROR(retval,"from read_wu_state() in worker()");
     
+    fprintf(stderr,"I: worker() - seti_do_work\n");
     retval = seti_do_work();
     if (retval) SETIERROR(retval,"from seti_do_work() in worker()");
 
+    fprintf(stderr,"I: worker() - boinc_finish\n");
     boinc_finish(retval);
   }
   catch (seti_error e) {
@@ -167,6 +171,7 @@ void worker() {
         boinc_finish(0);
         exit(0);            // an overflow is not an app error
     } else {
+        fprintf(stderr,"E: printing backtrace\n");
         e.print();
     	exit(static_cast<int>(e));
     }
