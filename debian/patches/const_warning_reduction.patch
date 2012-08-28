@@ -1,0 +1,55 @@
+Index: boinc-app-seti/client/main.cpp
+===================================================================
+--- boinc-app-seti.orig/client/main.cpp	2012-08-15 14:36:17.964705315 +0200
++++ boinc-app-seti/client/main.cpp	2012-08-15 23:36:18.529901259 +0200
+@@ -105,7 +105,7 @@
+ }
+ 
+ void print_error(int e) {
+-  char* p;
++  const char* p;
+ 
+   p = error_string(e);
+   fprintf(stderr,"%s\n",p);
+Index: boinc-app-seti/client/s_util.cpp
+===================================================================
+--- boinc-app-seti.orig/client/s_util.cpp	2012-08-12 11:22:38.826055066 +0200
++++ boinc-app-seti/client/s_util.cpp	2012-08-15 23:35:17.086787513 +0200
+@@ -211,8 +211,8 @@
+   return 0;
+ }
+ 
+-char* error_string(int e) {
+-  char* p;
++const char* error_string(int e) {
++  const char* p;
+   static char buf[256];
+ 
+   switch(e) {
+Index: boinc-app-seti/client/s_util.h
+===================================================================
+--- boinc-app-seti.orig/client/s_util.h	2012-08-15 23:18:15.760862431 +0200
++++ boinc-app-seti/client/s_util.h	2012-08-15 23:35:55.886227805 +0200
+@@ -150,6 +150,6 @@
+     float float_element[], unsigned char char_element[],
+     long num_elements, float scale_factor
+   );
+-extern char* error_string(int);
++extern const char* error_string(int);
+ 
+ #endif
+Index: boinc-app-seti/client/seti_header.cpp
+===================================================================
+--- boinc-app-seti.orig/client/seti_header.cpp	2012-08-15 14:36:18.344700191 +0200
++++ boinc-app-seti/client/seti_header.cpp	2012-08-15 23:37:53.128537837 +0200
+@@ -63,8 +63,8 @@
+ 
+ // Write a SETI work unit header to a file
+ 
+-char *receivers[]={"invalid","synthetic","ao1420"};
+-char *datatypes[]={"invalid","ascii","encoded","sun_binary"};
++const char *const receivers[]={"invalid","synthetic","ao1420"};
++const char *const datatypes[]={"invalid","ascii","encoded","sun_binary"};
+ 
+ SETI_WU_INFO::SETI_WU_INFO(const workunit &w) :
+     track_mem<SETI_WU_INFO>("SETI_WU_INFO"),

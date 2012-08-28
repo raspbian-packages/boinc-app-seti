@@ -1,0 +1,21 @@
+Index: boinc-app-seti/client/vector/analyzeFuncs_sse.cpp
+===================================================================
+--- boinc-app-seti.orig/client/vector/analyzeFuncs_sse.cpp	2012-08-28 11:10:30.000000000 +0800
++++ boinc-app-seti/client/vector/analyzeFuncs_sse.cpp	2012-08-28 11:17:21.156430572 +0800
+@@ -32,6 +32,7 @@
+ // This file is empty is __i386__ is not defined
+ #include "sah_config.h"
+ #include <vector>
++#include <cmath>
+ 
+ #if defined(__i386__) || defined(__x86_64__) || defined(USE_SSE)
+ 
+@@ -790,7 +791,7 @@
+ #elif defined(_WIN64) || defined(SUPPORTS_ATTRIB_OPT)
+     val -= ((val + roundVal) - roundVal);  // TODO: ADD CHECK THAT THIS WORKS
+ #else
+-    val -= floor(val + 0.5);
++    val -= std::floor(val + 0.5);
+ #endif
+     return val;
+ }     

@@ -1,0 +1,40 @@
+Modifications to the upstream source:
+ Some files are removed for various reasons.
+
+ Prebuilt windows binary:
+    client/win_build/jpeg.lib
+    client/win_build/libfftw3f-3-1-1a_upx.dll
+    client/win_build/libfftw3f-3.exp
+    client/win_build/libfftw3f.lib
+
+ Duplicate:
+    client/win_build/work_unit.sah: the same as client/test_workunits/reference_work_unit.sah
+
+ Not used in building:
+    jpeglib/
+    sah_config.h
+
+Repackaged upstream source:
+ The SETI@home project does not distribute source code releases as
+ tarballs, only tarballs of nightly Subversion snapshots are available.
+ These can be downloaded from this location:
+
+   http://setiweb.ssl.berkeley.edu/sah/seti_source/nightly/
+
+ For more information about the SETI@home source code see:
+
+   http://setiathome.berkeley.edu/sah_porting.php
+
+ The Debian BOINC Maintainers use a script called 'download-seti' to
+ download nightly tarballs and to prepare them for release in Debian.
+ This script is available in our Subversion repository:
+
+   http://svn.debian.org/wsvn/pkg-boinc/scripts/download-seti?op=file
+
+ For example, to download the SETI@home .orig.tar.gz tarball from the
+ 16th May 2006 this script is invoked as:
+
+   $ download-seti 2006-05-16
+
+ The latest .orig.tar.gz tarball can always be retrieved, using this
+ script, by invoking the get-orig-source target of debian/rules.

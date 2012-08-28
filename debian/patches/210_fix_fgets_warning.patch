@@ -1,0 +1,62 @@
+Index: boinc-app-seti/client/seti_header.cpp
+===================================================================
+--- boinc-app-seti.orig/client/seti_header.cpp	2012-08-12 11:22:38.866054523 +0200
++++ boinc-app-seti/client/seti_header.cpp	2012-08-12 11:45:01.923825804 +0200
+@@ -170,8 +170,9 @@
+ static workunit *wu;
+ 
+ int seti_parse_wu_header(FILE* f) {
+-  char buf[256];
++  char buf[2560];
+   int found=0;
++  buf[0]=0;
+  
+   std::string buffer("");
+   buffer.reserve(10*1024);
+@@ -183,13 +184,14 @@
+   //swi.fft_len=2048;
+   //swi.ifft_len=8;
+ 
++  char *fgets_return_value;
+   do {
+-    fgets(buf, 256, f);
+-  } while (!feof(f) && !xml_match_tag(buf,"<workunit_header")) ;
++    fgets_return_value=fgets(buf, sizeof(buf), f);
++  } while (!feof(f) && fgets_return_value && !xml_match_tag(buf,"<workunit_header")) ;
+  
+   buffer+=buf;
+ 
+-  while (fgets(buf, 256, f) && !xml_match_tag(buf,"</workunit_header")) {
++  while (fgets(buf, sizeof(buf), f) && !xml_match_tag(buf,"</workunit_header")) {
+     buffer+=buf;
+   }
+   buffer+=buf;
+@@ -207,8 +209,9 @@
+ }
+ 
+ int seti_parse_wu_header(FILE* f, SETI_WU_INFO &swi) {
+-  char buf[256];
++  char buf[2560];
+   int found=0;
++  buf[0]=0;
+   
+   std::string buffer("");
+   buffer.reserve(10*1024);
+@@ -219,13 +222,14 @@
+   //swi.fft_len=2048;
+   //swi.ifft_len=8;
+ 
++  char *fgets_return_value;
+   do {
+-    fgets(buf, 256, f);
+-  } while (!feof(f) && !xml_match_tag(buf,"<workunit_header")) ;
++    fgets_return_value=fgets_return_value=fgets(buf, sizeof(buf), f);
++  } while (!feof(f) && fgets_return_value && !xml_match_tag(buf,"<workunit_header")) ;
+   
+   buffer+=buf;
+ 
+-  while (fgets(buf, 256, f) && !xml_match_tag(buf,"</workunit_header")) {
++  while (fgets(buf, sizeof(buf), f) && !xml_match_tag(buf,"</workunit_header")) {
+     buffer+=buf;
+   }
+   buffer+=buf;

@@ -1,0 +1,38 @@
+
+The commented SAH_CHECK_JPEGLIB in configure.ac prevents that setiathome
+will be linked against libjpeg. If the package should be configured with
+"--enable-graphics" this needs to be uncommented.
+
+Index: boinc-app-seti/Makefile.am
+===================================================================
+--- boinc-app-seti.orig/Makefile.am	2012-08-30 11:16:30.436114900 +0800
++++ boinc-app-seti/Makefile.am	2012-08-30 11:24:16.796133060 +0800
+@@ -27,7 +27,7 @@
+ endif
+ 
+ 
+-SUBDIRS = $(JPEGDIR) $(IMDIR) $(GLUTDIR) $(CLIENT_SUBDIRS) $(SERVER_SUBDIRS)
++SUBDIRS = $(IMDIR) $(GLUTDIR) $(CLIENT_SUBDIRS) $(SERVER_SUBDIRS)
+ 
+ dist-hook:
+ 	rm -rf `find $(distdir) -name .backup -prune -o -name '*~' -o -name CVS`
+Index: boinc-app-seti/configure.ac
+===================================================================
+--- boinc-app-seti.orig/configure.ac	2012-08-30 11:17:17.416116730 +0800
++++ boinc-app-seti/configure.ac	2012-08-30 11:24:16.796133060 +0800
+@@ -420,6 +420,7 @@
+ 
+ SAH_AVX
+ 
++AM_CONDITIONAL(USE_MY_LIBJPEG, [false])
+ AM_CONDITIONAL(USE_MY_IMAGELIBS, [false])
+ AM_CONDITIONAL(USE_MY_GLUT, [false])
+ AM_CONDITIONAL(ENABLE_TESTS, [test "${enable_tests}" = yes])
+@@ -484,7 +485,6 @@
+ ])
+ 
+ AC_CONFIG_FILES([Makefile
+-                 jpeglib/Makefile
+                  client/Makefile
+ 		 tools/Makefile
+                  db/Makefile
