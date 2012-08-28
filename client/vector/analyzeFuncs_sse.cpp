@@ -32,6 +32,7 @@
 // This file is empty is __i386__ is not defined
 #include "sah_config.h"
 #include <vector>
+#include <cmath>
 
 #if defined(__i386__) || defined(__x86_64__) || defined(USE_SSE)
 
@@ -790,7 +791,7 @@ inline double fastfrac(double val, double roundVal) {
 #elif defined(_WIN64) || defined(SUPPORTS_ATTRIB_OPT)
     val -= ((val + roundVal) - roundVal);  // TODO: ADD CHECK THAT THIS WORKS
 #else
-    val -= floor(val + 0.5);
+    val -= std::floor(val + 0.5);
 #endif
     return val;
 }     
