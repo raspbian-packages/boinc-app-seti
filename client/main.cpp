@@ -105,7 +105,7 @@ void usage() {
 }
 
 void print_error(int e) {
-  char* p;
+  const char* p;
 
   p = error_string(e);
   fprintf(stderr,"%s\n",p);
