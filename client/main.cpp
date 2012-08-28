@@ -160,7 +160,7 @@ typedef seti_error boinc_error;
 
 extern APP_INIT_DATA app_init_data;
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
   int retval = 0, i;
   FORCE_FRAME_POINTER;
   run_stage=PREGRX;
@@ -176,7 +176,10 @@ int main(int argc, char** argv) {
   bool standalone = false;
   g_argv[0]=argv[0];
 
+  fprintf(stderr,"boinc-app-seti is invoked with the following arguments: \n");
+  fprintf(stderr,"--start\n");
   for (i=1; i<argc; i++) {
+    fprintf(stderr,"  %d: '%s'\n",i,argv[i]);
     g_argv[i]=argv[i];
     char *p=argv[i];
     while (*p=='-') p++;
@@ -204,6 +207,7 @@ int main(int argc, char** argv) {
       exit(1);
     }
   }
+  fprintf(stderr,"--end.\n");
 
   try {
 
@@ -236,16 +240,22 @@ int main(int argc, char** argv) {
     // Initialize BOINC
     //
 
+    fprintf(stderr,"I: boinc_parse_init_data_file\n");
     boinc_parse_init_data_file();
+    fprintf(stderr,"I: boinc_get_init_data\n");
     boinc_get_init_data(app_init_data);
 #ifdef BOINC_APP_GRAPHICS
+    fprintf(stderr,"I: sah_graphics_init\n");
     sah_graphics_init(app_init_data);
 #endif
+    fprintf(stderr,"I: boinc_init\n");
     retval = boinc_init();
     if (retval) {
       SETIERROR(retval, "from boinc_init()");
     }
+    fprintf(stderr,"I: worker\n");
     worker();
+    fprintf(stderr,"I: end.\n");
   }
   catch (seti_error e) {
     e.print();
