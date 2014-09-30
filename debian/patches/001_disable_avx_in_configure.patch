@@ -1,0 +1,24 @@
+Description: disable avx in build.
+--- a/m4/sah_avx.m4
++++ b/m4/sah_avx.m4
+@@ -2,7 +2,7 @@
+   AC_LANG_PUSH(C)
+   AC_MSG_CHECKING([if compiler supports -mavx])
+   save_cflags="${CFLAGS}"
+-  CFLAGS="-mavx"
++  CFLAGS="${CFLAGS} -mavx"
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[return 0;])],[
+   have_avx=yes
+   ],[
+--- a/configure.ac
++++ b/configure.ac
+@@ -523,7 +523,8 @@
+ AH_TEMPLATE([HAVE_STD_TRANSFORM],[Define to 1 if transform is in namespace std::])
+ SAH_FUNCS_IN_NAMESPACE([['min(0,0)'] ['max(0,0)'] ['transform((char *)0,(char *)0,(char *)0,(int(*)(int))malloc)']],std)
+ 
+-SAH_AVX
++#SAH_AVX
++have_avx=no
+ 
+ AM_CONDITIONAL(USE_MY_IMAGELIBS, [false])
+ AM_CONDITIONAL(USE_MY_GLUT, [false])

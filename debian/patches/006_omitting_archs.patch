@@ -1,0 +1,49 @@
+Description: omit "march" flag, to ensure more compatibility.
+--- a/m4/optimizations.m4
++++ b/m4/optimizations.m4
+@@ -13,7 +13,7 @@
+     [Define to 1 if you want to use SSE3 optimizations])
+ # put compiler specific flags here
+   if test x_$ac_cv_c_compiler_gnu = x_yes ; then
+-    CFLAGS="-march=prescott -msse3  -mfpmath=sse ${CFLAGS}"
++    CFLAGS="-msse3  -mfpmath=sse ${CFLAGS}"
+   fi
+ fi
+ 
+@@ -28,9 +28,6 @@
+ # put compiler specific flags here
+   if test x_$ac_cv_c_compiler_gnu = x_yes ; then
+     CFLAGS="-msse2 -mfpmath=sse ${CFLAGS}"
+-    if test -z "echo $CFLAGS | grep march=" ; then
+-      CFLAGS="-march=pentium4 ${CFLAGS}" 
+-    fi
+   fi
+ fi
+ 
+@@ -44,7 +41,7 @@
+     [Define to 1 if you want to use SSE optimizations])
+ # put compiler specific flags here
+   if test x_$ac_cv_c_compiler_gnu = x_yes ; then
+-    CFLAGS="-march=pentium3 -msse -mfpmath=sse ${CFLAGS}"
++    CFLAGS="-msse -mfpmath=sse ${CFLAGS}"
+   fi
+ fi
+ 
+@@ -58,7 +55,7 @@
+     [Define to 1 if you want to use MMX optimizations])
+ # put compiler specific flags here
+   if test x_$ac_cv_c_compiler_gnu = x_yes ; then
+-    CFLAGS="-march=pentium2 -mmmx -mfpmath=387 ${CFLAGS}"
++    CFLAGS="-mmmx -mfpmath=387 ${CFLAGS}"
+   fi
+ fi
+ 
+@@ -73,7 +70,7 @@
+     [Define to 1 if you want to use 3D-Now optimizations])
+ # put compiler specific flags here
+   if test x_$ac_cv_c_compiler_gnu = x_yes ; then
+-    CFLAGS="-march=pentium2 -m3dnow -mfpmath=387 ${CFLAGS}"
++    CFLAGS="-m3dnow -mfpmath=387 ${CFLAGS}"
+   fi
+ fi
+ 
