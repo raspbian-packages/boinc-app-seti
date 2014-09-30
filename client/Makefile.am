@@ -198,7 +198,8 @@ endif
 endif
 
 if PPC
-# allow use of altivec instructions on PPC
+if !LINUX
+# allow use of altivec instructions on PPC/MacOS
 seti_boinc-analyzeFuncs_altivec.o:  vector/analyzeFuncs_altivec.cpp
 	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(seti_boinc_CXXFLAGS) $(CXXFLAGS) -DUSE_ALTIVEC \
@@ -211,6 +212,7 @@ seti_boinc-analyzeFuncs_vector.o:  vector/analyzeFuncs_vector.cpp
 	-MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
 	-c -o $@ $<; then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
 	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+endif
 endif
 
 
