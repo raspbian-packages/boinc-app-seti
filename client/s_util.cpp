@@ -245,11 +245,11 @@ int float_to_uchar(float float_element[], unsigned char char_element[],
   return 0;
 }
 
-char* error_string(int e) {
+const char* error_string(int e) {
 #ifdef USE_MANUAL_CALLSTACK
   call_stack.enter("error_string()");
 #endif 
-  char* p;
+  const char* p;
   static char buf[256];
 
   switch(e) {
