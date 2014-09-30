@@ -1,0 +1,55 @@
+Modifications to the upstream source:
+ Some files are removed for various reasons.
+
+ Prebuilt windows binary:
+    client/win_build
+
+ Not express clearly freedom to modify:
+    glut
+
+ Not used in building:
+    jpeglib
+    splitter_old
+    mac_build
+    vector_lib
+
+ Duplicate:
+    client/win_build/work_unit.sah: the same as client/test_workunits/reference_work_unit.sah
+
+ Not used in building:
+    sah_config.h
+
+Repackaged upstream source:
+ The SETI@home project does not distribute source code releases as
+ tarballs, only subversion is available.
+ Source code be downloaded from this location:
+
+   svn co https://setisvn.ssl.berkeley.edu/svn/seti_boinc
+
+ For more information about the SETI@home source code see:
+
+   http://setiathome.berkeley.edu/sah_porting.php
+
+ The Debian BOINC Maintainers use a script called 'export-seti' to
+ download nightly tarballs and to prepare them for release in Debian.
+ This script is available in our git repository:
+
+   http://anonscm.debian.org/gitweb/?p=pkg-boinc/scripts.git;a=blob_plain;f=export-seti
+
+ The latest .orig.tar.gz tarball can always be retrieved, using this
+ script, by invoking the get-orig-source target of debian/rules.
+
+quilt configuration:
+ To keep it simple, this is recommended for ~/.quiltrc when editing debian/patches:
+
+ QUILT_PATCHES="debian/patches"
+ QUILT_NO_DIFF_TIMESTAMPS=1
+
+About graphics:
+ There're 2 flavors now: boinc-app-seti and boinc-app-seti-graphics.
+ Main difference in building process can be summarized as:
+ 1. Build seti with --enable-graphics, which generate 2 binaries.
+ 2. Put both into package boinc-app-seti-graphics, and put the
+    no-graphics one in boinc-app-seti.
+ 3. Mark boinc-app-seti and boinc-app-seti-graphics as in conflict with
+    each other.

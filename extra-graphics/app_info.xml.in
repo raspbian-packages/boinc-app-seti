@@ -1,0 +1,25 @@
+<app_info>
+    <app>
+        <name>setiathome_v7</name>
+    </app>
+    <file_info>
+        <name>setiathome_v7</name>
+        <executable/>
+    </file_info>
+    <file_info>
+        <name>setiathome_graphics</name>
+        <executable/>
+    </file_info>
+    <app_version>
+        <app_name>setiathome_v7</app_name>
+        <version_num>VERSION</version_num>
+        <file_ref>
+           <file_name>setiathome_v7</file_name>
+           <main_program/>
+        </file_ref>
+	    <file_ref>
+	       <file_name>setiathome_graphics</file_name>
+           <open_name>graphics_app</open_name>
+	    </file_ref>
+    </app_version>
+</app_info>
