@@ -27,7 +27,7 @@ if USE_MY_GLUT
 endif
 
 
-SUBDIRS = $(JPEGDIR) $(IMDIR) $(GLUTDIR) $(CLIENT_SUBDIRS) $(SERVER_SUBDIRS)
+SUBDIRS = $(IMDIR) $(CLIENT_SUBDIRS) $(SERVER_SUBDIRS)
 
 dist-hook:
 	rm -rf `find $(distdir) -name .backup -prune -o -name '*~' -o -name CVS`
