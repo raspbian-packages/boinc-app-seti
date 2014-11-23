@@ -41,8 +41,16 @@
  * Author: Mateusz Szpakowski
  */
  
+#if defined(__VFP_FP__) && !defined(__SOFTFP__)
+                .syntax unified
+#endif
                 .arch armv6
                 .fpu vfp
+#if defined(__VFP_FP__) && !defined(__SOFTFP__)
+                .eabi_attribute 27, 3
+                .eabi_attribute 28, 1
+#endif
+
                 .eabi_attribute 20, 1
                 .eabi_attribute 21, 1
                 .eabi_attribute 23, 3
