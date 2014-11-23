@@ -523,7 +523,8 @@ AH_TEMPLATE([HAVE_STD_MAX],[Define to 1 if max is in namespace std::])
 AH_TEMPLATE([HAVE_STD_TRANSFORM],[Define to 1 if transform is in namespace std::])
 SAH_FUNCS_IN_NAMESPACE([['min(0,0)'] ['max(0,0)'] ['transform((char *)0,(char *)0,(char *)0,(int(*)(int))malloc)']],std)
 
-SAH_AVX
+#SAH_AVX
+have_avx=no
 
 AM_CONDITIONAL(USE_MY_IMAGELIBS, [false])
 AM_CONDITIONAL(USE_MY_GLUT, [false])
