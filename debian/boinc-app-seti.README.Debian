@@ -1,0 +1,40 @@
+BOINC version of SETI@home (boinc-app-seti) for Debian
+======================================================
+
+This package creates symlinks for the SETI@home binary and its app_info.xml
+file in Debian's default BOINC data directory /var/lib/boinc-client. If you
+are not using the default data directory you need to create these symlinks
+yourself.
+
+Refer to the paragraph "Installing and configuring BOINC application packages"
+in /usr/share/doc/boinc-client/README.Debian for detailed instructions.
+
+
+About optimizing and compiler flags
+-----------------------------------
+
+The package uses only default -O3 optimization flags for the compiler.
+Consequently, users are not unlikely to be unsatisfied with the
+performance of the Debian-binary when comparing it with the results
+achieved on other systems.
+
+However, there is little else that can be done about it, the build daemons
+that assemble the packages across all platforms cannot know on which
+particular machine the resulting binary will be executed. To rescue us
+just a bit:
+ * i686 machines are all presumed to have SSE2, a respective configure
+   option to SETI is set
+ * amd64 machines are all presumed to have SSE2 and SSE3, also passed
+   to the SETI configuration
+It is straightforward to self-compile the package. The debian/rules
+file already accommodates for a substitution e.g. of the compiler and
+extra flags for further improvements.
+
+
+About CUDA support
+------------------
+
+The CUDA code is separated from the regular SETI client, i.e. demanding
+a separate checkout from the source code repository. Upstream plans to
+merge that with the regular distribution, eventually. We will wait for that
+rather than complicating things on our end.

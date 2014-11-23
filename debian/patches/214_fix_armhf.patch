@@ -1,0 +1,51 @@
+Author: Jacky Man <jackyman38@gmail.com>
+Description: (quoting the mail)
+Basically, the original assembly code for analyzeFuncs_neon.S and analyzeFuncs_vfp.S is writen for soft-float call convention. Since ARM has changed the way the function call with vfp, you will get a compilation error like the following if you don't modify the code.
+
+/usr/bin/ld: error: seti_boinc uses VFP register arguments, analyzeFuncs_neon.o does not
+/usr/bin/ld: failed to merge target specific data of file analyzeFuncs_neon.o
+/usr/bin/ld: error: seti_boinc uses VFP register arguments, analyzeFuncs_vfp.o does not
+/usr/bin/ld: failed to merge target specific data of file analyzeFuncs_vfp.o
+collect2: error: ld returned 1 exit status
+make[2]: *** [seti_boinc] Error 1
+
+May be I should talk to Eric about making the changes in the main tree with #ifdef _armhf_ or somthing like that. meanwhile if you come across the compilation error above, you have the solution.
+
+--- boinc-app-seti-7.19~svn2050.orig/client/vector/analyzeFuncs_neon.S
++++ boinc-app-seti-7.19~svn2050/client/vector/analyzeFuncs_neon.S
+@@ -41,8 +41,16 @@
+  * Author: Mateusz Szpakowski
+  */
+  
++#if defined(__VFP_FP__) && !defined(__SOFTFP__)
++                .syntax unified
++#endif
+                 .arch armv7-a
+                 .fpu neon
++#if defined(__VFP_FP__) && !defined(__SOFTFP__)
++                .eabi_attribute 27, 3
++                .eabi_attribute 28, 1
++#endif
++
+                 .eabi_attribute 20, 1
+                 .eabi_attribute 21, 1
+                 .eabi_attribute 23, 3
+--- boinc-app-seti-7.19~svn2050.orig/client/vector/analyzeFuncs_vfp.S
++++ boinc-app-seti-7.19~svn2050/client/vector/analyzeFuncs_vfp.S
+@@ -41,8 +41,16 @@
+  * Author: Mateusz Szpakowski
+  */
+  
++#if defined(__VFP_FP__) && !defined(__SOFTFP__)
++                .syntax unified
++#endif
+                 .arch armv6
+                 .fpu vfp
++#if defined(__VFP_FP__) && !defined(__SOFTFP__)
++                .eabi_attribute 27, 3
++                .eabi_attribute 28, 1
++#endif
++
+                 .eabi_attribute 20, 1
+                 .eabi_attribute 21, 1
+                 .eabi_attribute 23, 3

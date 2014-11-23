@@ -1,0 +1,30 @@
+Description: remove neon analyzeprocs
+  This package now has a --disable-neon option which diables the code that calls
+  the neon analyzeprocs. Unfortunately it doesn't stop them being built and 
+  linked in which causes the package to set off our armv7 contamination checker.
+  We manually remove it from the list of objects to build/include.
+Author: Peter Michael Green <plugwash@raspbian.org>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: http://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: <YYYY-MM-DD>
+
+--- boinc-app-seti-7.28~svn2203.orig/client/Makefile.am
++++ boinc-app-seti-7.28~svn2203/client/Makefile.am
+@@ -71,7 +71,6 @@ seti_boinc_SOURCES = \
+     vector/analyzeFuncs_avx.cpp \
+     vector/analyzeFuncs_x86_64.cpp \
+     vector/analyzeFuncs_altivec.cpp \
+-    vector/analyzeFuncs_neon.S \
+     vector/analyzeFuncs_vfp.S \
+     vector/analyzeFuncs_vfp_aux.cpp \
+     vector/x86_float4.cpp \

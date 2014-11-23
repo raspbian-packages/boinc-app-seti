@@ -1,0 +1,24 @@
+Description: Disable altivec on PPC if !LINUX
+ Taken from Ubuntu's 6.12~svn1305-2ubuntu1, at Tue, 12 Jun 2012 22:28:38 -0400.
+Author: Ben Collins <bcollins@ubuntu.com>
+
+--- a/client/Makefile.am
++++ b/client/Makefile.am
+@@ -198,7 +198,8 @@
+ endif
+ 
+ if PPC
+-# allow use of altivec instructions on PPC
++if !LINUX
++# allow use of altivec instructions on PPC/MacOS
+ seti_boinc-analyzeFuncs_altivec.o:  vector/analyzeFuncs_altivec.cpp
+ 	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+ 	$(CPPFLAGS) $(seti_boinc_CXXFLAGS) $(CXXFLAGS) -DUSE_ALTIVEC \
+@@ -212,6 +213,7 @@
+ 	-c -o $@ $<; then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
+ 	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+ endif
++endif
+ 
+ 
+ if LINUX
