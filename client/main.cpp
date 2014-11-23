@@ -111,7 +111,7 @@ void usage() {
 }
 
 void print_error(int e) {
-  char* p;
+  const char* p;
 #ifdef USE_MANUAL_CALLSTACK
   call_stack.enter("print_error()");
 #endif /* USE_MANUAL_CALLSTACK */
