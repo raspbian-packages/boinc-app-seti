@@ -1024,10 +1024,11 @@ int seti_parse_data(FILE* f, ANALYSIS_STATE& state) {
   unsigned long nbytes, nsamples,samples_per_byte;
   sah_complex *data;
   unsigned long i;
-  char *p, buf[256];
+  char *p, buf[2560];
   sah_complex *bin_data=0;
   int retval=0;
   FORCE_FRAME_POINTER;
+  buf[0]=0;
 #ifdef USE_MANUAL_CALLSTACK
   call_stack.enter("seti_parse_data()");
 #endif 
@@ -1042,7 +1043,7 @@ int seti_parse_data(FILE* f, ANALYSIS_STATE& state) {
   switch(swi.data_type) {
     case DATA_ASCII:
       for (i=0; i<nsamples; i++) {
-        p = fgets(buf, 256, f);
+        p = fgets(buf, sizeof(buf), f);
         if (!p) {
           SETIERROR(READ_FAILED,"in seti_parse_data");
         }
