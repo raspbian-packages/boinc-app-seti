@@ -1,0 +1,4 @@
+debian/extra-graphics/app_info.xml        usr/share/boinc-app-seti-graphics
+debian/extra-graphics/seti-graphics.cfg   usr/share/boinc-apps/info
+graphics/client/setiathome_graphics       usr/lib/boinc-app-seti-graphics
+graphics/client/setiathome_v8             usr/lib/boinc-app-seti-graphics

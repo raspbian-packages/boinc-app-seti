@@ -1,0 +1,3 @@
+debian/extra/app_info.xml   usr/share/boinc-app-seti
+debian/extra/seti.cfg       usr/share/boinc-apps/info
+nographics/client/setiathome_v8  usr/lib/boinc-app-seti/
