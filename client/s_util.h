@@ -150,6 +150,6 @@ extern int float_to_uchar(
     float float_element[], unsigned char char_element[],
     long num_elements, float scale_factor
   );
-extern char* error_string(int);
+extern const char* error_string(int);
 
 #endif
