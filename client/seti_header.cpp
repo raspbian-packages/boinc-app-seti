@@ -195,8 +195,9 @@ SETI_WU_INFO swi;
 static workunit *wu;
 
 int seti_parse_wu_header(FILE* f) {
-  char buf[256];
+  char buf[2560];
   int found=0;
+  buf[0]=0;
 #ifdef USE_MANUAL_CALLSTACK
   call_stack.enter("seti_parse_wu_header(FILE *)");
 #endif /* USE_MANUAL_CALLSTACK */
@@ -211,13 +212,14 @@ int seti_parse_wu_header(FILE* f) {
   //swi.fft_len=2048;
   //swi.ifft_len=8;
 
+  char *fgets_return_value;
   do {
-    fgets(buf, 256, f);
-  } while (!feof(f) && !xml_match_tag(buf,"<workunit_header")) ;
+    fgets_return_value=fgets(buf, sizeof(buf), f);
+  } while (!feof(f) && fgets_return_value && !xml_match_tag(buf,"<workunit_header")) ;
  
   buffer+=buf;
 
-  while (fgets(buf, 256, f) && !xml_match_tag(buf,"</workunit_header")) {
+  while (fgets(buf, sizeof(buf), f) && !xml_match_tag(buf,"</workunit_header")) {
     buffer+=buf;
   }
   buffer+=buf;
@@ -241,8 +243,9 @@ int seti_parse_wu_header(FILE* f, SETI_WU_INFO &swi) {
 #ifdef USE_MANUAL_CALLSTACK
   call_stack.enter("seti_parse_wu_header(FILE *, SETI_WU_INFO &)");
 #endif /* USE_MANUAL_CALLSTACK */
-  char buf[256];
+  char buf[2560];
   int found=0;
+  buf[0]=0;
   
   std::string buffer("");
   buffer.reserve(10*1024);
@@ -253,13 +256,14 @@ int seti_parse_wu_header(FILE* f, SETI_WU_INFO &swi) {
   //swi.fft_len=2048;
   //swi.ifft_len=8;
 
+  char *fgets_return_value;
   do {
-    fgets(buf, 256, f);
-  } while (!feof(f) && !xml_match_tag(buf,"<workunit_header")) ;
+    fgets_return_value=fgets_return_value=fgets(buf, sizeof(buf), f);
+  } while (!feof(f) && fgets_return_value && !xml_match_tag(buf,"<workunit_header")) ;
   
   buffer+=buf;
 
-  while (fgets(buf, 256, f) && !xml_match_tag(buf,"</workunit_header")) {
+  while (fgets(buf, sizeof(buf), f) && !xml_match_tag(buf,"</workunit_header")) {
     buffer+=buf;
   }
   buffer+=buf;
