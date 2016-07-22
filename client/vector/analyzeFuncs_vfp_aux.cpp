@@ -47,6 +47,7 @@
 #include "diagnostics.h"
 #include "asmlib.h"
 #include "pulsefind.h"
+#include "fp_arm.h"
 
 
 template <int x>
