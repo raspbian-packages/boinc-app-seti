@@ -1,0 +1,204 @@
+#!/usr/bin/make -f
+
+# Uncomment this to compile with gcc-snapshot.
+#export  CC=/usr/lib/gcc-snapshot/bin/gcc
+#export CXX=/usr/lib/gcc-snapshot/bin/g++
+#export CPP=/usr/lib/gcc-snapshot/bin/cpp
+
+# Uncomment for particular version of gcc
+#export  CC := gcc-4.7
+#export CXX := g++-4.7
+#export CPP := cpp-4.7
+
+# Uncomment for clang (llvm)
+#export CC  = clang
+#export CXX = clang
+
+# Set default flags with dpkg-buildflags
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+DEB_BUILD_GNU_CPU  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_CPU)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+
+# PKG = boinc-app-seti
+
+export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+export CFLAGS   := $(shell dpkg-buildflags --get CFLAGS)
+export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
+export LDFLAGS  := $(shell dpkg-buildflags --get LDFLAGS)
+
+# Uncomment this to enable compilation with UltraSPARC specific compiler
+# flags. This will most probably increase setiathome's performance or if
+# your are unlucky will break it.
+#
+#CPUTYPE = $(shell head -1 /proc/cpuinfo | cut -f 2 -d ':' | cut -f 3 -d '\' )
+#ifeq (UltraSparc, $(CPUTYPE))
+#  CPUSUBTYPE = $(shell head -1 /proc/cpuinfo | cut -f 2 -d ':' | \
+#    cut -f 4 -d '\' | cut -f 1 -d '+')
+#  CFLAGS += -mcpu=v9
+#  CXXFLAGS += -mcpu=v9
+#  ifeq (III, $(CPUSUBTYPE))
+#    CFLAGS += -mcpu=ultrasparc3
+#    CXXFLAGS += -mcpu=ultrasparc3
+#  else
+#    CFLAGS += -mcpu=ultrasparc
+#    CXXFLAGS += -mcpu=ultrasparc
+#  endif
+#  CFLAGS += -m64
+#  CXXFLAGS += -m64
+#  DEB_CONFIGURE_EXTRA_FLAGS += --enable-bitness=64
+#endif
+
+
+# Append this to CFLAGS and CXXFLAGS.
+CFLAGS_APPEND += -I/usr/include/boinc -I/usr/include/boinc/lib -I/usr/include/boinc/api
+
+ifneq (clang,$(CXX))
+CFLAGS_APPEND += -O3
+#CFLAGS_APPEND += -mno-avx
+#CFLAGS_APPEND += -msse4.2
+GCCVERSION=$(shell $(CXX) --version | tr " " "\n" | egrep '^[0-9]+\.[0-9]+\.[0-9]+$$' | cut -f1,2 -d.)
+endif
+
+ifeq (clang,$(CXX))
+GCCVERSION=$(shell $(CXX) --version | tr " " "\n" | egrep '^[0-9]+\.[0-9]+-[0-9]+$$' | cut -f1 -d-)
+CFLAGS_APPEND += -O3
+# -O4 implies link-time optimisation with clang, fails
+endif
+
+ifeq (linux,$(shell dpkg-architecture -qDEB_TARGET_ARCH_OS))
+ifneq (,$(findstring local,$(DEB_BUILD_OPTIONS)))
+LOCALOPTIMISATION="yes"
+endif
+ifeq (,$(shell dpkg-parsechangelog | egrep '^Distribution:' |egrep -v 'UNRELEASED'))
+LOCALOPTIMISATION="yes"
+endif
+endif
+
+# If the package is not meant to be distributed to main servers, then maximise optimisation
+ifneq (,$(LOCALOPTIMISATION))
+  $(info I: Setting native flags for optimisation)
+  CFLAGS_APPEND += -march=native -mtune=native
+else
+  $(info W: Would have set native flags for optimisation but supported only for linux)
+ifeq ($(DEB_BUILD_GNU_CPU),i686)
+  # Demand i686 class system
+  CFLAGS_APPEND += -march=i686 -mcpu=i686
+endif
+endif
+
+ifeq ($(DEB_BUILD_GNU_CPU),x86_64)
+  SETIEXTRAFLAGS += --enable-sse3
+#  SETIEXTRAFLAGS += --disable-avx
+#  SETIEXTRAFLAGS += --enable-sse2 --enable-sse --enable-mmx
+endif
+
+ifeq ($(DEB_BUILD_GNU_CPU),i686)
+  SETIEXTRAFLAGS += --enable-sse2 --enable-sse --enable-mmx
+endif
+
+# This is a shame, but there is yet no AltiVec for Linux PowerPC with SETI
+SETIEXTRAFLAGS= --disable-altivec
+
+# Link-time optimisation demands knowledge about all CFLAGS both at
+# compile time (as represented by CFLAGS and CXXFLAGS) but also at
+# at link time.
+#ifeq (,$(findstring nolto,$(DEB_BUILD_OPTIONS)))
+# $(info I: Activating LinkTimeOptimisation)
+# SETIEXTRAFLAGS += -flto
+# LDFLAGS += -flto
+# #CXX := $(CXX) $(CXXFLAGS)
+# #CC := $(CC) $(CFLAGS)
+# AR := gcc-ar
+# RANLIB := gcc-ranlib
+#endif
+
+# Although all source file are C++, some handwritten rules in
+# client/Makefile.am seem to use CFLAGS only.
+CFLAGS   += $(CFLAGS_APPEND)
+CXXFLAGS += $(CFLAGS_APPEND)
+
+
+# Get upstream version from debian version.
+UPSTREAM_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | \
+  cut -d ' ' -f 2 | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 | perl -pe 's/^.*?://')
+# Remove dot "." in upstream version for use in app_info.xml
+APP_INFO_VERSION = $(subst .,,$(UPSTREAM_VERSION))
+
+
+%:
+	dh $@ --parallel --with autoreconf
+
+CFGFLAGS = \
+	  --disable-static-client \
+	  --disable-static \
+	  --enable-shared \
+	  --enable-client \
+	  --disable-server \
+	  --enable-dependency-tracking \
+	  --with-gnu-ld $(SETIEXTRAFLAGS) \
+	  --disable-neon
+
+override_dh_auto_configure:
+	#./_autosetup
+	#if [ ! -r ltmain.sh ]; then libtoolize; fi
+	#aclocal -I m4 && autoheader && automake && autoconf
+	# Remember to not configure with --disable-dependency-tracking, because
+	# it breaks some handwritten rules in client/Makefile.am which require
+	# that DEPDIR exists.
+	#
+	# use two directories for graphics/nographics
+	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	BOINCDIR=/usr/include/boinc dh_auto_configure --builddirectory=graphics \
+	  -- $(CFGFLAGS) --enable-graphics
+	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	BOINCDIR=/usr/include/boinc dh_auto_configure --builddirectory=nographics \
+	  -- $(CFGFLAGS) --disable-graphics
+
+override_dh_auto_build:
+	dh_auto_build -O--parallel --builddirectory=graphics
+	dh_auto_build -O--parallel --builddirectory=nographics
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf configure Makefile.in aclocal.m4 assimilator/Makefile.in client/Makefile.in sah_config.h.in splitter_fft/Makefile.in splitter_pfb/Makefile.in tools/Makefile.in
+	rm -rf compile config.guess config.sub depcomp install-sh ltmain.sh m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 missing
+	# separate building dirs
+	rm -rf graphics/
+	rm -rf nographics/
+	# may be seen after invoking binary
+	rm -f boinc_finish_called result.sah state.sah stderr.txt stderrgfx.txt wisdom.sah work_unit.sah boinc_lockfile project_specific_defines.h boinc_setiathome_*
+
+override_dh_install: 
+	cp -f nographics/client/seti_boinc  nographics/client/setiathome_v8
+	cp -f graphics/client/seti_boinc    graphics/client/setiathome_v8
+	cp -f graphics/client/seti_graphics graphics/client/setiathome_graphics
+	cat debian/extra/app_info.xml.in | perl -ne 'print unless /^#/' | \
+	  sed -e 's/VERSION/$(APP_INFO_VERSION)/' > debian/extra/app_info.xml
+	cat debian/extra-graphics/app_info.xml.in | perl -ne 'print unless /^#/' | \
+	  sed -e 's/VERSION/$(APP_INFO_VERSION)/' > debian/extra-graphics/app_info.xml
+	dh_install --list-missing
+
+
+override_dh_strip:
+	dh_strip --dbgsym-migration=boinc-app-seti-dbg
+
+
+origDir ?= .
+
+get-orig-source:
+	if [ ! -d "$(origDir)" ]; then \
+	  echo "Destination directory '$(origDir)' does not exist."; \
+	  exit; \
+	fi; \
+	cd $(origDir); \
+	EXP=/tmp/download-seti; \
+	nice="nice -5"; if [ -x /usr/bin/ionice ]; then nice="$$nice ionice -c 3"; fi ; \
+	$$nice wget -O$$EXP "http://git.debian.org/?p=pkg-boinc/scripts.git;a=blob_plain;f=export-seti;hb=HEAD" --quiet && \
+	chmod +x $$EXP && $$EXP && rm -f $$EXP
+
+.PHONY: get-orig-source
