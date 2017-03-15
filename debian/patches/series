@@ -1,0 +1,16 @@
+210_fix_fgets_warning.patch
+211_give_stderr_some_output.patch
+212_increase_buffers.patch
+213_const_warning_reduction.patch
+# put Debian-specific patches at end
+001_disable_avx_in_configure.patch
+#002_disable_static_linkage.patch
+003_dont_use_own_jpeglib_and_glut.patch
+004_disable_altivec_on_ppc_linux.patch
+#005_powerpc_altivec.patch
+006_omitting_archs.patch
+007_worker_comments.patch
+216-fix-build.patch
+#fix-arm-build.patch
+isnan-fix.patch
+upstream-fix.patch
