@@ -1,0 +1,276 @@
+#! /usr/bin/perl -w
+
+# usage: run_mb_splitter [-filedir filedir] 
+
+use locale;
+use sigtrap qw(HUP TERM INT);
+use Cwd;
+use Fcntl;
+
+$ENV{'INFORMIXDIR'} = '/usr/local/informix';
+$ENV{'INFORMIXSQLHOSTS'} = '/usr/local/informix/etc/sqlhosts';
+$ENV{'INFORMIXSERVER'} = 'sah_master_tcp';
+$ENV{'LD_LIBRARY_PATH'} = '/usr/local/informix/lib:/usr/local/informix/lib/esql:/usr/local/lib:/usr/X11R6/lib:/usr/lib:/lib:/usr/ccs/lib:/usr/local/lib:/usr/local/ssl/lib:/usr/local/informix/lib:/usr/local/informix/lib/esql:/usr/local/generic/lib:/usr/lib64:/usr/lib64/mysql'; 
+
+# ALFA receivers must be specified with beam (0-6) and polarization (0-1), i.e. -alfa=4,0
+
+# signal handler sub
+
+sub touch_and_die {
+  print STDERR time . " run_mb_splitter caught signal and is touching ${split_halt_msg}..\n";
+  system ("/bin/touch $split_halt_msg");
+  exit(99)
+  }
+
+sub is_completely_done {
+  my $chkfile = $_[0];
+  my $completely_done = 1;
+  my $errors = 0;
+  for (my $chkbeam = 0; $chkbeam < 7; $chkbeam++) {
+    for (my $chkpolarization = 0; $chkpolarization < 2; $chkpolarization++) {
+      if (! -f "${chkfile}.done.${chkbeam},${chkpolarization}" &&
+          ! -f "${chkfile}.ERROR.${chkbeam},${chkpolarization}") { $completely_done = 0; }
+      if (  -f "${chkfile}.ERROR.${chkbeam},${chkpolarization}") { $errors = 1; }
+      }
+    }
+  if ($completely_done == 1 && $errors == 1) { return -1; } # completely done, but with errors
+  return $completely_done;
+  }
+
+# project/splitter vars
+#
+sleep(rand()*30);
+
+$mb_prog_loc = "/home/boincadm/projects/sah/bin";
+$mb_prog_name = "mb_splitter_swb.x86_64";
+$app_name = "setiathome_enhanced";
+
+$project_dir = "/home/boincadm/projects/sah/";
+
+# $file_dir = "/disks/thumper/raid5_d/users/seti/dr2_data/production/processing";
+$file_dir = "/home/boincadm/projects/sah/processing";
+$split_halt_msg = "$project_dir/stop_splitters";
+$email_list = 'jeffc@ssl.berkeley.edu korpela@ssl.berkeley.edu mattl@ssl.berkeley.edu';
+$found_file = "0";
+$host = `/bin/uname -n | /bin/sed s/.ssl.berkeley.edu//`;
+$dovertical = 0;
+chomp $host;
+$usage = "usage: run_mb_splitter [-vertical] [-exe executable_name] [-filedir filedir] [-app app_name]\n(assuming all executables are in: $mb_prog_loc)\n";
+
+
+# before anything, stagger processes by sleeping a bit
+
+@numprocs = `pgrep -f run_mb_splitter`;
+$sleepsecs = $#numprocs * 2;
+sleep $sleepsecs;
+
+# check args
+
+$checkhelp = $ARGV[0] || "";
+if ($checkhelp eq "-h" || $checkhelp eq "-help" || $checkhelp eq "--help") { print $usage; exit(2); }
+
+while ($ARGV[0] ne "") {
+  $tempvar = $ARGV[0];
+  if ($tempvar eq '-filedir') {
+    shift @ARGV;
+    $file_dir = $ARGV[0]
+    }
+  elsif ($tempvar eq '-exe') {
+    shift @ARGV;
+    $mb_prog_name = $ARGV[0]
+    }
+  elsif ($tempvar eq '-app') {
+    shift @ARGV;
+    $app_name = $ARGV[0]
+    }
+  elsif ($tempvar eq '-vertical') {
+    $dovertical = 1;
+    }
+  else { print $usage; exit(2); }
+  shift @ARGV;
+  }
+
+$SIG{HUP} = $SIG{TERM} = $SIG{INT} = \&touch_and_die;
+
+# main loop (run as long as halt trigger file doesn't exist)
+
+while (! -f "$split_halt_msg") {
+
+  chdir $file_dir;
+  $found_file = 0;
+
+  # get working state of directory and determine what work is available to do
+  undef @file_list;
+  # NOTE: slurp in 2000-2007 files first, then 2008-2009 files, then anything after 2010
+  open (LS,"/bin/ls -tr . |");
+  while (<LS>) { 
+    $thisfile = $_; chomp $thisfile;
+    if (/^[0-9][0-9][a-z][a-z]0[0-7][a-z][a-z]$/) { push @file_list, $_ }
+    }
+  close (LS);
+  open (LS,"/bin/ls -tr . |");
+  while (<LS>) { 
+    $thisfile = $_; chomp $thisfile;
+    if (/^[0-9][0-9][a-z][a-z]0[8-9][a-z][a-z]$/) { push @file_list, $_ }
+    }
+  close (LS);
+  open (LS,"/bin/ls -tr . |");
+  while (<LS>) { 
+    $thisfile = $_; chomp $thisfile;
+    if (/^[0-9][0-9][a-z][a-z][1-9][0-9][a-z][a-z]$/) { push @file_list, $_ }
+    }
+  close (LS);
+  chomp @file_list;
+  $dothisfile = ""; $dobeam = -1; $dopolarization = -1;
+  foreach $file (@file_list) {
+    # is it a broken sym link?
+    if (! -e $file) {
+      print "${file} doesn't actually exist! (broken sym link?) skipping...\n";
+      next;
+      }
+    # are we working on this file already?
+    $isworking = 0;
+    for ($beam = 0; $beam < 7; $beam++) {
+      for ($polarization = 0; $polarization < 2; $polarization++) {
+        if (-f "${file}.working.${beam},${polarization}") { $isworking = 1; }
+        }
+      }
+    # if we're working on this file already and -vertical is set, skip it:
+    if ($isworking == 1 && $dovertical == 1) { 
+      print "${file} is being worked on and -vertical is set - moving on...\n";
+      next;
+      }
+    # check if completely done and clean up in case this hasn't happened yet
+    if (is_completely_done($file) == 1 && ! -f "${file}.completely_done") {
+      `/bin/touch ${file}.completely_done`;
+      `/bin/rm -f ${file}.done.*`;
+      }
+    if (is_completely_done($file) == -1 && ! -f "${file}.completely_done_with_errors") {
+      `/bin/touch ${file}.completely_done_with_errors`;
+      }
+    if (-f "${file}.completely_done") {
+      print "${file} is completely_done - moving on...\n";
+      next;
+      }
+    if (-f "${file}.copying_in_lando") {
+      print "${file} is currently being read in from lando - moving on...\n";
+      next;
+      }
+    if (-f "${file}.copying_in_hpss") {
+      print "${file} is currently being read in from hpss - moving on...\n";
+      next;
+      }
+    for ($beam = 0; $beam < 7; $beam++) {
+      for ($polarization = 0; $polarization < 2; $polarization++) {
+        if ($dothisfile eq "") {
+          print "trying file $file beam $beam polarization $polarization\n";
+          }
+        if (! -f "${file}.working.${beam},${polarization}" &&
+            ! -f "${file}.done.${beam},${polarization}" &&
+            ! -f "${file}.ERROR.${beam},${polarization}" &&
+            $dothisfile eq "") {
+          $dothisfile = $file;
+          $dobeam = $beam;
+          $dopolarization = $polarization;
+          } # end if
+        } # end for polarization
+      } # end for beam
+    } # end foreach file
+  if ($dothisfile eq "") {
+    print "nothing to do - exiting...\n";
+    exit(6);
+    }
+  
+  print "starting splitting on file: $dothisfile beam: $dobeam polarization: $dopolarization...\n";
+  
+  sysopen (WORKING,"${dothisfile}.working.${dobeam},${dopolarization}",O_WRONLY|O_EXCL|O_CREAT) or die "wait a minute - race condition opening .working file - bailing!!!\n";
+  $now = `/bin/date`; chomp $now;
+  print WORKING "$host : ". time() . " ($now)\n";
+  close (WORKING);
+
+  open(MAIL, "|/usr/sbin/sendmail -t");
+  print MAIL "To: ${email_list}\n";
+  print MAIL 'From: splitters@ssl.berkeley.edu' . "\n";
+  print MAIL "Subject: splitter starting on host: ${host}\n\n";
+  print MAIL "starting file: ${dothisfile} beam: ${dobeam} polarization: ${dopolarization}\n";
+  close(MAIL);
+
+  $now = `/bin/date`; chomp $now; 
+  print "$now : starting file: ${dothisfile} beam: ${dobeam} polarization: ${dopolarization}\n";
+
+  $filefullpath = "${file_dir}/${dothisfile}";
+
+  mkdir "/tmp/splitter_${dothisfile}_${dobeam}_${dopolarization}";
+  mkdir "/tmp/splitter_${dothisfile}_${dobeam}_${dopolarization}/wu_inbox";
+  chdir "/tmp/splitter_${dothisfile}_${dobeam}_${dopolarization}";
+  `/bin/rm -f wu_inbox/*`;
+
+  print "LD_LIBRARY_PATH: ";
+  print $ENV{'LD_LIBRARY_PATH'};
+  print "\n";
+
+  $splitcommand = "/bin/nice -19 /usr/bin/ionice -c2 -n7 ${mb_prog_loc}/${mb_prog_name} $filefullpath -resume -alfa=${dobeam},${dopolarization} -projectdir=${project_dir} -trigger_file_path=/${split_halt_msg} -appname=${app_name}";
+
+  print "(running command: ${splitcommand})\n";
+
+  $retval = system ($splitcommand);
+  $retval = $retval >> 8;
+
+  print "(command exited with retval: $retval)\n";
+  
+  if ( $retval == 0 ) { # splitter ended gracefully at end of file
+    sleep 60; # wait for child process to finish moving the files from wu_inbox
+    open(MAIL, "|/usr/sbin/sendmail -t");
+    print MAIL "To: ${email_list}\n";
+    print MAIL 'From: splitters@ssl.berkeley.edu' . "\n";
+    print MAIL "Subject: splitter finishing on host: ${host}\n\n";
+    print MAIL "finished file: ${dothisfile} beam: ${dobeam} polarization: ${dopolarization}\n";
+    #open (MAIL, "|/usr/ucb/mail -s \"$host splitter finished\" $email_list");
+    open (MAIL, "|/bin/mail -s \"$host splitter finished\" $email_list");
+    print MAIL "$host splitter finished on file: ${dothisfile}\n\n";
+    open (RCDCHK,"splitterlog");
+    while (<RCDCHK>) { print MAIL $_ }
+    close (RCDCHK);
+    close(MAIL);
+    if (-f "${filefullpath}.firsttry.${dobeam},${dopolarization}") {
+      `/bin/touch ${filefullpath}.done.${dobeam},${dopolarization}`;
+      `/bin/rm -f ${filefullpath}.firsttry.${dobeam},${dopolarization}`;
+      if (is_completely_done($filefullpath) == 1 && ! -f "${filefullpath}.completely_done") {
+        `/bin/touch ${filefullpath}.completely_done`;
+        `/bin/rm -f ${filefullpath}.done.*`;
+        }
+      if (is_completely_done($filefullpath) == -1 && ! -f "${filefullpath}.completely_done_with_errors") {
+        `/bin/touch ${filefullpath}.completely_done_with_errors`;
+        }
+      }
+    else {
+      `/bin/touch ${filefullpath}.firsttry.${dobeam},${dopolarization}`;
+      }
+    `/bin/rm -f ${filefullpath}.working.${dobeam},${dopolarization}`;
+    chdir $file_dir;
+    `/bin/rm -rf /tmp/splitter_${dothisfile}_${dobeam}_${dopolarization}`;
+    }
+  elsif ( $retval == 2 ) { # splitter ended gracefully but before finishing file
+    # remove working suffix - allows it to be resumed later
+    `/bin/rm -f ${filefullpath}.working.${dobeam},${dopolarization}`;
+    chdir $file_dir;
+    `/bin/rm -rf /tmp/splitter_${dothisfile}_${dobeam}_${dopolarization}`;
+    print "WARNING : splitter running on file: ${dothisfile} beam: ${dobeam} polarization: ${dopolarization} ended before EOF\n";
+    }
+  else { # spitter ended in error! 
+    open(ERRFILE,">${filefullpath}.ERROR.${dobeam},${dopolarization}");
+    print ERRFILE "$host\n";
+    close(ERRFILE);
+    `/bin/rm -f ${filefullpath}.working.${dobeam},${dopolarization}`;
+    print "CRITICAL : splitter running on file: ${dothisfile} beam: ${dobeam} polarization: ${dopolarization} ended in error!\n";
+    print "exiting run_mb_splitter (and keeping working dir in /tmp)..\n";
+    exit(1);
+    }
+
+  $now = `/bin/date`; chomp $now; 
+  print "$now : finished running on file: ${dothisfile} beam: ${dobeam} polarization: ${dopolarization}\n";
+
+  } # while halt trigger file doesn't exist
+
+print "$split_halt_msg exists - exiting..\n";
+exit (0);

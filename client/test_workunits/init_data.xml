@@ -1,0 +1,77 @@
+<app_init_data>
+<major_version>0</major_version>
+<minor_version>0</minor_version>
+<release>0</release>
+<app_version>0</app_version>
+<slot>987</slot>
+<wu_cpu_time>0</wu_cpu_time>
+<user_total_credit>0.000000</user_total_credit>
+<user_expavg_credit>0.000000</user_expavg_credit>
+<host_total_credit>0.000000</host_total_credit>
+<host_expavg_credit>0.000000</host_expavg_credit>
+<resource_share_fraction>0.000000</resource_share_fraction>
+<checkpoint_period>60.000000</checkpoint_period>
+<fraction_done_update_period>0.000000</fraction_done_update_period>
+<fraction_done_start>0.000000</fraction_done_start>
+<fraction_done_end>0.000000</fraction_done_end>
+<rsc_fpops_est>0.000000</rsc_fpops_est>
+<rsc_fpops_bound>0.000000</rsc_fpops_bound>
+<rsc_memory_bound>0.000000</rsc_memory_bound>
+<rsc_disk_bound>0.000000</rsc_disk_bound>
+<host_info>
+    <timezone>0</timezone>
+    <domain_name></domain_name>
+    <ip_addr></ip_addr>
+    <host_cpid></host_cpid>
+    <p_ncpus>0</p_ncpus>
+    <p_vendor></p_vendor>
+    <p_model></p_model>
+    <p_features></p_features>
+    <p_fpops>0.000000</p_fpops>
+    <p_iops>0.000000</p_iops>
+    <p_membw>0.000000</p_membw>
+    <p_calculated>0.000000</p_calculated>
+    <m_nbytes>134217728.000000</m_nbytes>
+    <m_cache>0.000000</m_cache>
+    <m_swap>0.000000</m_swap>
+    <d_total>0.000000</d_total>
+    <d_free>0.000000</d_free>
+    <os_name></os_name>
+    <os_version></os_version>
+    <accelerators></accelerators>
+</host_info>
+<proxy_info>
+    <socks_version>0</socks_version>
+    <socks_server_name></socks_server_name>
+    <socks_server_port>0</socks_server_port>
+    <http_server_name></http_server_name>
+    <http_server_port>0</http_server_port>
+    <socks5_user_name></socks5_user_name>
+    <socks5_user_passwd></socks5_user_passwd>
+    <http_user_name></http_user_name>
+    <http_user_passwd></http_user_passwd>
+</proxy_info>
+<global_preferences>
+   <mod_time>0</mod_time>
+   <suspend_if_no_recent_input>0.000000</suspend_if_no_recent_input>
+   <start_hour>0.000000</start_hour>
+   <end_hour>0.000000</end_hour>
+   <net_start_hour>0.000000</net_start_hour>
+   <net_end_hour>0.000000</net_end_hour>
+   <work_buf_min_days>0.000010</work_buf_min_days>
+   <work_buf_additional_days>0.250000</work_buf_additional_days>
+   <max_cpus>1</max_cpus>
+   <cpu_scheduling_period_minutes>60.000000</cpu_scheduling_period_minutes>
+   <disk_interval>0.000000</disk_interval>
+   <disk_max_used_gb>0.000000</disk_max_used_gb>
+   <disk_max_used_pct>0.000000</disk_max_used_pct>
+   <disk_min_free_gb>0.000000</disk_min_free_gb>
+   <vm_max_used_pct>0.000000</vm_max_used_pct>
+   <ram_max_used_busy_pct>50.000000</ram_max_used_busy_pct>
+   <ram_max_used_idle_pct>90.000000</ram_max_used_idle_pct>
+   <idle_time_to_run>0.000000</idle_time_to_run>
+   <max_bytes_sec_up>1000000000000.000000</max_bytes_sec_up>
+   <max_bytes_sec_down>1000000000000.000000</max_bytes_sec_down>
+   <cpu_usage_limit>100.000000</cpu_usage_limit>
+</global_preferences>
+</app_init_data>
