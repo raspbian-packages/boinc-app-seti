@@ -1,9 +1,16 @@
-boinc-app-seti (8.00~svn3363-3+rpi1) stretch-staging; urgency=medium
+boinc-app-seti (8.00~svn3363-4+rpi1) buster-staging; urgency=medium
 
   [changes brought forward from 7.28~svn2633-3+rpi1 by Peter Michael Green <plugwash@raspbian.org> at Sun, 23 Nov 2014 15:14:28 +0000]
   * Disable neon
 
- -- Raspbian forward porter <root@raspbian.org>  Fri, 22 Jul 2016 03:04:55 +0000
+ -- Raspbian forward porter <root@raspbian.org>  Wed, 28 Jun 2017 22:54:49 +0000
+
+boinc-app-seti (8.00~svn3363-4) unstable; urgency=medium
+
+  * Fix broken symlink (thanks Andreas Beckmann!)
+    Closes: #857517
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 15 Mar 2017 16:29:18 +0100
 
 boinc-app-seti (8.00~svn3363-3) unstable; urgency=medium
 
