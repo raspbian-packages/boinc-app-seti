@@ -33,7 +33,7 @@
 #include <vector>
 #include <cmath>
 
-#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__) || defined(__aarch64__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
 
 
 #define INVALID_CHIRP 2e+20
