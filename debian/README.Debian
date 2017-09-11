@@ -1,0 +1,17 @@
+boinc-app-seti
+==============
+
+This package nicely integrates with BOINC for those contributing to SETI. To
+best possibly help with the computation, it is suggested to recompile the
+package locally. To indicate that there are no ambitions to upload the 
+compiled-to-local-package to the archive, add "local" to the DEB_BUILD_OPTIONS.
+
+The following you may perform on any Debian platform that understands the
+-march=native flag, which is Linux as of today:
+
+	sudo apt-get build-dep boinc-app-seti
+	DEB_BUILD_OPTIONS=local apt-get source --compile boinc-app-seti
+	sudo dpkg -i boinc-app-seti_*.deb
+
+
+ -- Steffen Moeller <moeller@debian.org>  Sun, 15 May 2016 21:09:02 +0200

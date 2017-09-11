@@ -1,0 +1,582 @@
+boinc-app-seti (8.00~svn3701-1) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Mon, 11 Sep 2017 19:33:46 +0200
+
+boinc-app-seti (8.00~svn3701-1~exp1) experimental; urgency=medium
+
+  * New upstream release, patch refresh
+  * Bump compat level to 10.
+  * Try to fix arm64 build.
+  * Bump std-version to 4.1.0, no changes required.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 11 Apr 2017 14:24:24 +0200
+
+boinc-app-seti (8.00~svn3643-1~exp3) experimental; urgency=medium
+
+  * Introduced LTO (Link Time Optimization).
+
+ -- Steffen Moeller <moeller@debian.org>  Tue, 11 Apr 2017 00:23:22 +0200
+
+boinc-app-seti (8.00~svn3643-1~exp2) experimental; urgency=medium
+
+  * Moved to debhelper 10, eliminating invocation of dh_autoreconf (Gianfranco and Steffen)
+  * Gave explicit reference to libboinc-app7 (>= 7.6.33) (Closes: #825374).
+
+ -- Steffen Moeller <moeller@debian.org>  Mon, 10 Apr 2017 18:14:54 +0200
+
+boinc-app-seti (8.00~svn3643-1~exp1) experimental; urgency=medium
+
+  * New upstream release, drop upstream fix.
+  * Patch refresh
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 04 Apr 2017 10:14:51 +0200
+
+boinc-app-seti (8.00~svn3363-4) unstable; urgency=medium
+
+  * Fix broken symlink (thanks Andreas Beckmann!)
+    Closes: #857517
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 15 Mar 2017 16:29:18 +0100
+
+boinc-app-seti (8.00~svn3363-3) unstable; urgency=medium
+
+  [ Steffen Moeller ]
+  * Transition to auto-dbg packages
+  * Removed dependency on unused libgsl (Closes: #823878), thanks for spotting
+    and suggesting so go to James Cowgill.
+  * Bumped standard to 3.9.8.
+  * Demand at least i686 architecture for x86.
+  * Introduce -march=native for local builds and added respective instructions
+    to debian/README.Debian
+
+  [ Gianfranco Costamagna ]
+  * Fix VCS fields.
+  * Remove build fix for arm, preferring upstream fix.
+  * Fix build with gcc-6 and glib-2.23 (Closes: #831186)
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Thu, 14 Jul 2016 11:40:51 +0200
+
+boinc-app-seti (8.00~svn3363-2) unstable; urgency=medium
+
+  * Fix an armhf build failure by reverting the pld removal.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 02 Feb 2016 09:15:18 +0100
+
+boinc-app-seti (8.00~svn3363-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #813326).
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Thu, 21 Jan 2016 10:01:38 +0100
+
+boinc-app-seti (7.28~svn3106-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update my uid.
+  * Set priority optional
+  * Drop useless build-dependencies (autoconf, automake, libtool)
+    useless with dh-autoreconf
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 11 Sep 2015 09:41:54 +0200
+
+boinc-app-seti (7.28~svn3013-1) unstable; urgency=medium
+
+  * New upstream release.
+  * d/p/216-fix-build.patch fix build error
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Mon, 23 Feb 2015 14:49:35 +0100
+
+boinc-app-seti (7.28~svn2633-3) unstable; urgency=medium
+
+  * Bump std-version to 3.9.6, no changes required.
+  * Stop depending on old boinc-dev.
+  * Update copyright, now in machine readable format.
+  * Add description to patches, reorder them,
+    use patch name as written in README.patches.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Tue, 30 Sep 2014 14:49:40 +0200
+
+boinc-app-seti (7.28~svn2633-2) unstable; urgency=medium
+
+  * Rebuild against new boinc.
+  * Add some missing copyright entries.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Sat, 27 Sep 2014 23:46:22 +0200
+
+boinc-app-seti (7.28~svn2633-1) unstable; urgency=medium
+
+  * Rebuild against new boinc.
+  * New upstream release.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Thu, 04 Sep 2014 18:15:55 +0200
+
+boinc-app-seti (7.28~svn2408-1) unstable; urgency=medium
+
+  * Updated Guo's uid in debian/control.
+  * New upstream release, build against boinc 7.4.8.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Sun, 08 Jun 2014 10:26:17 +0200
+
+boinc-app-seti (7.28~svn2385-1) unstable; urgency=medium
+
+  * New upstream release, build against new boinc 7.3.19.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Thu, 05 Jun 2014 19:19:23 +0200
+
+boinc-app-seti (7.28~svn2203-1) unstable; urgency=medium
+
+  * New upstream release, patch refresh.
+  * Drop fix-armel.patch and fix-ftbfs-arm64.patch, addressed
+    upstream.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Mon, 14 Apr 2014 00:10:11 +0200
+
+boinc-app-seti (7.19~svn2051-2) unstable; urgency=medium
+
+  * Upload to unstable.
+  * Switch to dh-autoreconf.
+  * Tweak app-info.xml file after upstream suggestion,
+    thanks Claggy!
+  * Moved app name from setiathome_enhanced to setiathome_v7
+    for upstream suggestion.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Wed, 05 Mar 2014 09:40:55 +0100
+
+boinc-app-seti (7.19~svn2051-1) experimental; urgency=low
+
+  * Re-imported the old version with no changes, just for bumping
+    the version number and allowing the upload of the package
+    due to the 7.19~svn2050-2.is.7.00~svn1933-2 version, greater
+    than 7.19~svn2050-3.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Tue, 25 Feb 2014 14:05:41 +0100
+
+boinc-app-seti (7.19~svn2050-3) UNRELEASED; urgency=low
+
+  * Uploading to experimental, fixing armel and armhf ftbfs.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Sat, 15 Feb 2014 17:34:43 +0100
+
+boinc-app-seti (7.19~svn2050-2.is.7.00~svn1933-2) unstable; urgency=low
+
+  * Re added autotools-dev as build-dep, fixing arm64 ftbfs
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Mon, 30 Dec 2013 23:04:20 +0100
+
+boinc-app-seti (7.19~svn2050-2.is.7.00~svn1933-1) unstable; urgency=low
+
+  * Tweak debian/rules, forcing 7.00 as version
+  * Rebuild 1933 against new boinc_7.2.33+dfsg-1 (Closes: #733204)
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Sun, 29 Dec 2013 17:09:45 +0100
+
+boinc-app-seti (7.19~svn2050-1) unstable; urgency=low
+
+  * New upstream snapshot.
+  * Fixed a ftbfs on ubuntu arm64.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 22 Nov 2013 13:34:26 +0100
+
+boinc-app-seti (7.19~svn2022-2) UNRELEASED; urgency=low
+
+  * Bumped std version to 3.9.5, no changes required.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Wed, 06 Nov 2013 10:15:31 +0100
+
+boinc-app-seti (7.19~svn2022-1) unstable; urgency=low
+
+  * Upload to unstable
+  * New upstream release, addressing some autosetup warnings
+  * Added autotools-dev as build-dep (Closes: #727333)
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 11 Oct 2013 18:22:23 +0200
+
+boinc-app-seti (7.09~svn1982-1) experimental; urgency=low
+
+  * New upstream release, addressing some arm* problems
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 06 Sep 2013 12:09:30 +0200
+
+boinc-app-seti (7.07~svn1976-1) unstable; urgency=low
+
+  * New upstream release, patch refresh.
+  * Tweaked debian/rules, now uses _autosetup script.
+  * Added libtool as build-dep.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Wed, 04 Sep 2013 18:43:28 +0200
+
+boinc-app-seti (7.00~svn1933-1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed win_build, mac_build, vector_lib, jpeglib
+    not used in building and not completely listed in copyright file.
+  * debian/copyright and README.sources have been updated.
+  * dropping 101_freebsd_build.patch and separate_build_dir.patch,
+    accepted upstream.
+  * Removed debian/watch, unused.
+  * Little changes in debian/README.source files.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Thu, 25 Jul 2013 09:38:04 +0200
+
+boinc-app-seti (7.00~svn1883-3) UNRELEASED; urgency=low
+
+  * Remove astropulse in app_info.xml.in.
+
+ -- Guo Yixuan <culu.gyx@gmail.com>  Thu, 18 Jul 2013 09:57:38 +0800
+
+boinc-app-seti (7.00~svn1883-2) unstable; urgency=low
+
+  [ Gianfranco Costamagna ]
+  * Added libxmu-dev, libxi-dev as build-depends
+  * Added boinc-manager as boinc-app-seti suggests fields
+  * Tweaked some version checks in control file
+  * Rebuild against boinc 7.1.21+dfsg-1
+    to fix a FTBFS in ubuntu 13.10.
+
+  [ Guo Yixuan ]
+  * Added a new package: boinc-app-seti-graphics, which provide
+    a visualizer for seti.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Thu, 27 Jun 2013 13:13:29 +0200
+
+boinc-app-seti (7.00~svn1883-1) unstable; urgency=low
+
+  * New upstream release.
+  * New app_info.xml file (Closes: #711734)
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 21 Jun 2013 17:51:45 +0200
+
+boinc-app-seti (7.00~svn1854-2) UNRELEASED; urgency=low
+
+  * Disabled checkin_notes in dh_install_changelogs
+    not updated anymore.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Tue, 18 Jun 2013 11:23:57 +0200
+
+boinc-app-seti (7.00~svn1854-1) unstable; urgency=low
+
+  * New upstream release.
+    - Makefiles bugs fixed.
+  * Added libgsl0-dev as build-dep.
+  * Disabled checkin_notes in dh_install_changelogs
+    not updated anymore.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 24 May 2013 11:33:48 +0200
+
+boinc-app-seti (7.00~svn1828-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+  * Enabling hardening flags.
+  * Bumped debian/compat to 9.
+  * Build-dep updated to boinc 7.0.65+dfsg-2 to avoid FTBFS
+  * Removed some build-dep version requirement
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Thu, 02 May 2013 16:59:58 +0200
+
+boinc-app-seti (7.00~svn1791-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Removed Makefile and Makefile.in from splitter_* directories
+  * Fixed debian/rules clean script
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Mon, 25 Mar 2013 10:11:53 +0100
+
+boinc-app-seti (7.00~svn1772-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+  * Removed glut from source tree and disabled.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Mon, 25 Feb 2013 11:35:32 +0100
+
+boinc-app-seti (7.00~svn1708-1) UNRELEASED; urgency=low
+
+  [ Gianfranco Costamagna ]
+  * New upstream version.
+  * debian/control
+    - Bumped policy compliance to 3.9.4, no changes required.
+
+  [ Guo Yixuan ]
+  * Updated README.source.
+
+  [ Steffen Moeller ]
+  * Added link time optimisation
+    - compiler bug demands g++ version >= 4.8
+    - only building in experimental until 4.8 is in unstable
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Mon, 05 Nov 2012 14:48:54 +0100
+
+boinc-app-seti (7.00~svn1704-1) UNRELEASED; urgency=low
+
+  * New upstream version.
+
+ -- Guo Yixuan <culu.gyx@gmail.com>  Sat, 03 Nov 2012 00:02:38 +0800
+
+boinc-app-seti (7.00~svn1703-1) UNRELEASED; urgency=low
+
+  * New upstream version.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 02 Nov 2012 12:52:08 +0100
+
+boinc-app-seti (6.97~svn1409-2) UNRELEASED; urgency=low
+
+  * Reorganize debian/patches.
+
+ -- Guo Yixuan <culu.gyx@gmail.com>  Sun, 23 Sep 2012 22:53:02 +0800
+
+boinc-app-seti (6.97~svn1409-1) unstable; urgency=low
+
+  [Eric J. Korpela]
+  * app_info.xml: setiathome_enhanced replies to version 6 and 7 jobs
+
+  [Guo Yixuan]
+  * Removed Windows binaries in source tree, and some other files, see
+    README.source.
+  * New upstream version:
+    - sah_v7 branch becomes trunk.
+    - new feature: autocorrelation.
+    - re-enabled 003_dont_use_own_jpeglib.patch, and refreshed some patches.
+
+  [Steffen Moeller]
+  * debian/control: boinc-app-seti suggests boinc-manager
+
+ -- Guo Yixuan <culu.gyx@gmail.com>  Tue, 28 Aug 2012 11:05:07 +0800
+
+boinc-app-seti (6.12~svn1385-3) unstable; urgency=low
+
+  * Correcting for previous dependency on libs of BOINC 7.0.33.
+
+ -- Steffen Moeller <moeller@debian.org>  Mon, 20 Aug 2012 23:11:29 +0200
+
+boinc-app-seti (6.12~svn1385-2) UNRELEASED; urgency=low
+
+  [Guo Yixuan]
+
+  * debian/patches/004_disable_altivec_on_ppc_linux.patch: Disable use of
+    altivec on PPC in the case of LINUX. Fixes FTBFS, thanks to Ben Collins
+    <bcollins@ubuntu.com>.
+
+  [Steffen Moeller]
+
+  * Removed Fernando from uploaders.
+  * SETI DMUA flag for Guo Yixuan.
+
+ -- Guo Yixuan <culu.gyx@gmail.com>  Sun, 19 Aug 2012 14:56:37 +0800
+
+boinc-app-seti (6.12~svn1385-1) unstable; urgency=low
+
+  * New upstream version.
+  * Reduced warnings during compilation.
+
+ -- Steffen Moeller <moeller@debian.org>  Sat, 18 Aug 2012 19:49:53 +0200
+
+boinc-app-seti (6.12~svn1306-3) UNRELEASED; urgency=low
+
+  * Platform-specific optimisations back in
+  * Disabled AltiVec for PowerPC because of FTBFS otherwise
+
+ -- Steffen Moeller <moeller@debian.org>  Wed, 15 Aug 2012 13:18:56 +0200
+
+boinc-app-seti (6.12~svn1306-2) unstable; urgency=low
+
+  * debian/rules: auto_clean improved.
+  * increased verbosity of stderr
+  * someone somewhen changed build-dependency to boinc-dev
+    (from libboinc-app-dev) (Closes: #679757).
+  * fixes crash on amd64 as it seems (Closes: #674248)
+
+ -- Steffen Moeller <moeller@debian.org>  Sun, 12 Aug 2012 00:31:34 +0200
+
+boinc-app-seti (6.12~svn1306-1) unstable; urgency=low
+
+  * New upstream version.
+  * Added inclusion<cmath> for kfreebsd (Closes: #675839)
+
+ -- Steffen Moeller <moeller@debian.org>  Tue, 29 May 2012 23:52:47 +0200
+
+boinc-app-seti (6.12~svn1305-3) UNRELEASED; urgency=low
+
+  [ Steffen Moeller ]
+  * Rebuilt against libboinc-app, and libboinc with it,
+    substituting dependency on boinc-dev.
+
+  [ Guo Yixuan ]
+  * Try to fix ftbfs on freebsd and powerpc.
+  * Install checkin_notes as upstream changelog.
+
+ -- Steffen Moeller <moeller@debian.org>  Mon, 28 May 2012 20:00:10 +0200
+
+boinc-app-seti (6.12~svn1305-2) unstable; urgency=low
+
+  * debian/control:
+    - remove quilt from build-depends.
+    - add myself in Uploaders.
+  * debian/rules:
+    - add dh_install in override target to install app_info.xml and seti.cfg.
+    - use dpkg-buildflags to add -g and default hardening options.
+
+ -- Guo Yixuan <culu.gyx@gmail.com>  Thu, 24 May 2012 23:16:40 +0800
+
+boinc-app-seti (6.12~svn1305-1) unstable; urgency=low
+
+  * New upstream version.
+    - Removed all patches
+    - Adjusted debian/rules for dynamic linking
+  * Updated debian/control
+    - Steffen's uploader's email address, removed Martin
+    - Set priority to extra (from optional)
+  * Bumped policy compliance to 3.9.3
+    - Source format 3.0
+    - Adjusted clean target to allow repeated builds with git
+    - added build-arch/-indep debian/rules targets
+  * README.Debian and README.source get some extra wording
+
+ -- Steffen Moeller <moeller@debian.org>  Sat, 19 May 2012 15:17:06 +0200
+
+boinc-app-seti (5.28~20080105-1) UNRELEASED; urgency=low
+
+  [ Frank S. Thomas ]
+  * New upstream snapshot from 05 Jan 2008.
+  * debian/patches/:
+    - Removed 001_build_fixes.patch and 004_include_new_str_util.h.patch
+      because they are not required for the new upstream version.
+    - Updated 002_disable_static_linkage.patch and
+      003_dont_use_own_jpeglib.patch for the new release.
+  * debian/control:
+    - Bumped Standards-Version from 3.8.0 to 3.8.1, no changes required.
+    - Removed myself from Uploaders.
+
+  [ Fernando C. Estrada ]
+  * debian/control:
+    - Bumped Standards-Version from 3.8.1 to 3.8.4, no changes required.
+    - Added my self as a Uploader.
+
+ -- Fernando C. Estrada <fcestrada@fcestrada.com>  Tue, 23 Mar 2010 21:55:22 -0600
+
+boinc-app-seti (5.13+cvs20060510-7.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Includes Ilya Barygin <barygin@gmail.com> patchs to fix a FTBFS
+    coming since the last upgrade of boinc-dev, thanks for the
+    patches! (Closes: #614443)
+
+ -- Ying-Chun Liu (PaulLiu) <paulliu@debian.org>  Mon, 14 May 2012 23:58:40 +0800
+
+boinc-app-seti (5.13+cvs20060510-7) unstable; urgency=low
+
+  * debian/control:
+    - Add myself to uploaders
+    - Use Standards-Version 3.8.4 (No changes needed)
+    - Bump boinc-dev B-D to 6.10.17+dfsg-3 
+  * Includes Ilya Barygin <barygin@gmail.com> patchs to fix a FTBFS
+    coming since the last upgrade of boinc-dev, thanks for the 
+    patches! (Closes: #556817) 
+  * debian/rules: 
+    - Delete configure to prevent ship the modified file
+    - Use `clean' instead of `distclean', dist-clean fails to clean the package.
+    - Remove some auto-generated files that are not cleaned on `clean' target
+  * Switch to dpkg-source 3.0 (quilt) format
+    - Remove quilt from debian/rules and from B-D
+    - Remove README.source
+
+ -- Rene Mayorga <rmayorga@debian.org>  Thu, 25 Mar 2010 19:50:29 -0600
+
+boinc-app-seti (5.13+cvs20060510-6) unstable; urgency=low
+
+  * debian/control:
+    - Bumped Standards-Version from 3.8.0 to 3.8.1, no changes required.
+    - Removed myself from Uploaders.
+
+ -- Frank S. Thomas <fst@debian.org>  Wed, 18 Mar 2009 15:58:52 +0100
+
+boinc-app-seti (5.13+cvs20060510-5) unstable; urgency=low
+
+  [ Frank S. Thomas ]
+  * Use debhelper V7 instead of CDBS to minimize debian/rules.
+  * debian/control:
+    - Fix spelling error in long description. (closes: #501205)
+    - Updated Vcs-* fields since we are now using Git.
+    - Wrapped Uploaders field because this is permitted since policy 3.8.0.
+    - Removed -1 revision from boinc-dev build dependency to satisfy Lintian.
+    - Bumped Standards-Version from 3.7.3 to 3.8.0. This required to rename
+      debian/README.Debian-source to debian/README.source and to add a note
+      that we use quilt for patch management.
+  * Added a dummy debian/watch file that explains why upstream tarballs cannot
+    be meaningfully monitored to fix Lintian's debian-watch-file-is-missing
+    informational tag.
+  * debian/patches/:
+    - Added 102_fix_typo_for_gcc4.4.patch to fix a FTBFS with GCC 4.4. Thanks
+      to Martin Michlmayr <tbm@cyrius.com> for the bug report and the patch.
+      (closes: #505012)
+    - Added missing descriptions to some patch files to appease Lintian.
+
+ -- Frank S. Thomas <fst@debian.org>  Sun, 08 Feb 2009 11:47:26 +0100
+
+boinc-app-seti (5.13+cvs20060510-4) unstable; urgency=low
+
+  [ Steffen Moeller ]
+  * debian/rules: Wrote get-orig-source target that downloads the latest
+    nightly tarball.
+
+  [ Frank S. Thomas ]
+  * debian/control.in:
+    - Bumped Standards-Version from 3.7.2 to 3.7.3, no changes required.
+    - Changed my maintainer address to fst@debian.org.
+  * debian/rules: Remove --disable-dependency-tracking from configure's
+    arguments, because it breaks some handwritten rules in client/Makefile.am
+    which require that $(DEPDIR) exists.
+  * Bumped debhelper compat level from V5 to V6 since this is the current
+    recommended level and raised the build dependency to "debhelper (>= 6)".
+  * debian/patches/: Added 201_missing_header_for_gcc4.3.patch in order to
+    fix a FTBFS with recent GCC 4.3 snapshots. Thanks to Martin Michlmayr
+    <tbm@cyrius.com> for the bug report. (closes: #462051)
+
+ -- Frank S. Thomas <fst@debian.org>  Wed, 23 Jan 2008 21:27:23 +0100
+
+boinc-app-seti (5.13+cvs20060510-3) unstable; urgency=low
+
+  * debian/rules: Remove two binary files that are not removed by "make clean"
+    and use clean instead of distclean as DEB_MAKE_CLEAN_TARGET, because
+    distclean removes files that are needed to build this package. These
+    changes fixes the FTBFS if build twice in a row. (closes: #442513)
+  * debian/control.in:
+    - Moved Homepage pseudo field in the long description to the source stanza
+      because this is now a propper debian/control field supported by dpkg.
+    - fftw3-dev was renamed to libfftw3-dev, adjusted Build-Depends
+      accordingly.
+
+ -- Frank S. Thomas <frank@thomas-alfeld.de>  Thu, 11 Oct 2007 16:21:39 +0200
+
+boinc-app-seti (5.13+cvs20060510-2) unstable; urgency=low
+
+  * debian/boinc-app-seti-prerm: Stop the BOINC core client before removing
+    the SETI@home symlinks from the data directory to prevent the client from
+    downloading new work units although no application to process these is
+    present. (related to: #415765)
+  * debian/control.in:
+    - Added XS-Vcs fields to the source stanza.
+    - Improved the description of the package and explicitly stated that this
+      package is not needed on i386 and amd64 hosts since SETI@home supports
+      those architectures officially.
+  * debian/copyright: Added copyright information for glut/Roman.stroke and
+    glut/stroke.h and added a copyright note about the Debian packaging.
+  * Changed from dpatch to the quilt patch system.
+  * debian/patches/:
+    - 004_include_new_str_util.h.patch added. The strlcpy() and strlcat()
+      functions that were previously declared in boinc-dev/lib/util.h have
+      been moved in BOINC 5.10 to the new boinc-dev/lib/str_util.h header
+      file, so we need to include this new header in some files. Bumped build
+      dependency to "boinc-dev (>= 5.10.8-1)" accordingly. (closes: #433737)
+    - 003_dont_use_own_jpeglib.patch modified to prevent that setiathome is
+      linked against libjpeg. This ensures predictability of the dependecy
+      list, see http://lists.debian.org/debian-devel/2007/07/msg00588.html for
+      details.
+
+ -- Frank S. Thomas <frank@thomas-alfeld.de>  Thu, 19 Jul 2007 14:21:27 +0200
+
+boinc-app-seti (5.13+cvs20060510-1) unstable; urgency=low
+
+  * Initial release based on Steffen Moeller's boinc-client-seti package.
+
+ -- Frank S. Thomas <frank@thomas-alfeld.de>  Mon, 22 May 2006 09:09:03 +0200
+

@@ -1,0 +1,14 @@
+Description: Fix arm64 build, pld instruction seems to be not available there.
+Author: Gianfranco Costamagna <locutusofborg@debian.org>
+
+--- boinc-app-seti-8.00~svn3643.orig/client/vector/analyzeFuncs_vfp_aux.cpp
++++ boinc-app-seti-8.00~svn3643/client/vector/analyzeFuncs_vfp_aux.cpp
+@@ -33,7 +33,7 @@
+ #include <vector>
+ #include <cmath>
+ 
+-#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__) || defined(__aarch64__)
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+ 
+ 
+ #define INVALID_CHIRP 2e+20
