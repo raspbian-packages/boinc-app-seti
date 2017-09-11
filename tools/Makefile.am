@@ -18,7 +18,7 @@ CLIENT_C_FLAGS = $(CFLAGS) \
 
 CLIENT_LD_FLAGS = $(PTHREAD_CFLAGS) $(LDFLAGS) $(PTHREAD_LIBS) $(BOINC_LIBS) 
 
-noinst_PROGRAMS = fakedata workunit_resample readwu.so
+noinst_PROGRAMS = fakedata workunit_resample # readwu.so
 
 fakedata_SOURCES = \
     fakedata.cpp \
