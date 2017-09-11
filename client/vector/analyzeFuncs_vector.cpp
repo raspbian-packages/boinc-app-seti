@@ -44,9 +44,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <cmath>
-#ifdef __APPLE_CC__
 #define isnan std::isnan
-#endif
 #include <signal.h>
 #include <setjmp.h>
 #ifdef HAVE_FLOAT_H
