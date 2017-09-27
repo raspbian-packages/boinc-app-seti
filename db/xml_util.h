@@ -210,9 +210,7 @@ class xml_ifstream {
 #endif // 0
 
 #define XML_ENCODING "iso-8859-1"
-
-static const char * const xml_header=
-  "<?xml version=\"1.0\" encoding=\""XML_ENCODING"\"?>\n";
+static const char * const xml_header="<?xml version=\"1.0\" encoding=\"" XML_ENCODING "\"?>\n";
 
 // XML entity for tranlation table (not wchar_t compatible)
 struct xml_entity {

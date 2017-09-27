@@ -4,7 +4,7 @@ Bug-Debian: https://bugs.debian.org/831186
 
 --- boinc-app-seti-8.00~svn3363.orig/client/vector/analyzeFuncs_vector.cpp
 +++ boinc-app-seti-8.00~svn3363/client/vector/analyzeFuncs_vector.cpp
-@@ -45,9 +45,7 @@
+@@ -44,9 +44,7 @@
  #include <csignal>
  #include <cstdlib>
  #include <cmath>

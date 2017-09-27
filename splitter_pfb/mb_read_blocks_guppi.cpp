@@ -74,8 +74,8 @@ struct hdrinfo {
     char frontend[24];      // Frontend used
     long double MJD_epoch;  // Starting epoch in MJD
     double fctr;            // Center frequency of the observing band (MHz)
-    double df;              // Frequency spacing between the channels (MHz)
-    double BW;              // Bandwidth of the observing band (MHz)
+    double df;              // Frequency spacing between the channels (MHz)		// in BL data, this is header item CHAN_BW
+    double BW;              // Bandwidth of the observing band (MHz)			// in BL data, this is header item OBSBW
     int nbits;              // Number of bits per data sample
     int nchan;              // Number of channels
     int rcvr_polns;         // Number of polns provided by the receiver
@@ -94,7 +94,7 @@ struct subint {
 
 unsigned long total_samples = 0;
 unsigned long limit_samples;
-unsigned long last_num_samples_read;
+unsigned long last_num_sample_bytes_read;
 
 #define RAW_DATA_HEADER_BUF_SIZE 32768
 //#define RAW_DATA_HEADER_BUF_SIZE 8192         // TODO would it help to do less reading/rewinding for each header?
@@ -156,6 +156,52 @@ void populate_header(
 ) {
 //-------------------------------------------------------
 
+
+#if 0
+	// orig frequency code:
+    // this assumes that channels are ordered with *descending* frequency 
+    // (the higher the channel, the lower the frequency) and that BW
+    // and df are always positive.
+    // TODO - channel ordering should come from a recorder_config field
+    this_tapebuffer.header.sky_freq =   (long int) (
+                              (double) 1e6 * 
+                              ( 
+                                (rawinput.pf.hdr.fctr   + 
+                                (rawinput.pf.hdr.BW/2)) -      
+                                ((control_block.channel+0.5) * rawinput.pf.hdr.df)
+                              )
+                            );
+#endif
+//#if 0
+	// new frequency code:
+    // this assumes in the case of *descending* frequency, both BW and df will
+    // be negative, otherwise positive.  Ie, this should work in all cases where
+    // the -BW and -df protocol is followed. 
+	this_tapebuffer.header.sky_freq =   (long int) ( 
+							(double) 1e6 *  
+	                        (  
+ 	                          (rawinput.pf.hdr.fctr   -  
+	 	                      (rawinput.pf.hdr.BW/2)) +  
+	                          ((control_block.channel+0.5) * rawinput.pf.hdr.df) 
+	                        ) 
+						  );
+//#endif
+
+fprintf(stderr, "rawinput.pf.hdr.BW is %f\n", rawinput.pf.hdr.BW);
+fprintf(stderr, "rawinput.pf.hdr.df is %f\n", rawinput.pf.hdr.df);
+	if(rawinput.pf.hdr.BW < 0) {
+ 		log_messages.printf(SCHED_MSG_LOG::MSG_DEBUG,"Adjusting for negative BW : rawinput.pf.hdr.BW was %f ... ", rawinput.pf.hdr.BW); 
+		rawinput.pf.hdr.BW = fabs(rawinput.pf.hdr.BW);
+ 		log_messages.printf(SCHED_MSG_LOG::MSG_DEBUG,"is %f ", rawinput.pf.hdr.BW); 
+	}
+	if(rawinput.pf.hdr.df < 0) {
+		log_messages.printf(SCHED_MSG_LOG::MSG_DEBUG, "Adjusting for negative BW : rawinput.pf.hdr.df was %f ... ", rawinput.pf.hdr.df); 
+		rawinput.pf.hdr.df = fabs(rawinput.pf.hdr.df);
+		log_messages.printf(SCHED_MSG_LOG::MSG_DEBUG,"is %f ... ", rawinput.pf.hdr.df); 
+	}
+fprintf(stderr, "rawinput.pf.hdr.BW is %f\n", rawinput.pf.hdr.BW);
+fprintf(stderr, "rawinput.pf.hdr.df is %f\n", rawinput.pf.hdr.df);
+
     /* size of this header */
     this_tapebuffer.header.header_size = sizeof(this_tapebuffer.header);
 
@@ -174,16 +220,6 @@ void populate_header(
 
     /* there is no "dataseq in guppi data.  TODO - right? */
     //this_tapebuffer.header.dataseq = 0;
-
-    this_tapebuffer.header.sky_freq =   (long int) (
-                              (double) 1e6 * 
-                              ( 
-                                (rawinput.pf.hdr.fctr   - 
-                                (rawinput.pf.hdr.BW/2)) + 
-                                ((control_block.channel+0.5) * rawinput.pf.hdr.df)
-                              )
-                            );
-
     print_header(this_tapebuffer);
 }
 
@@ -363,7 +399,16 @@ int read_block(
 					
 			   		if(rawinput.gf.packetindex == control_block.curindx) {    // file integrity check - are we at the correct index?  Yes...
 
-						 fseek(rawinput.fil, gethlength(header_buf), SEEK_CUR);         // skip past header
+						 long seek_len;
+						 long hlength = (long)gethlength(header_buf);
+						 if(rawinput.pf.hdr.directio) {
+							seek_len = hlength + (512 - (hlength%512))%512;				// directio aligns on 512 byte boundaries
+							fprintf(stderr, "adjusting for directio (%d) : %ld becomes %ld\n", rawinput.pf.hdr.directio, hlength, seek_len);
+						 } else {
+							seek_len = hlength;											// not directio so no forced alignment
+							fprintf(stderr, "NOT adjusting for directio (%d) : %ld becomes %ld\n", rawinput.pf.hdr.directio, hlength, seek_len);
+						 }
+						 fseek(rawinput.fil, seek_len, SEEK_CUR);         				  // skip past header
 						 rv=0;
 						 
 						 if (control_block.currentblock > (control_block.startblock-1)){   // if we have reached user requested startblock (default 0)
@@ -381,14 +426,14 @@ int read_block(
                                // to the point of resumption.
                                if(control_block.currentblock >= control_block.last_block_done) {
                                     //if(control_block.vflag>=1) fprintf(stderr, "prior to unpack_samples : last : %ld total : %ld\n", 
-                                    //                                   last_num_samples_read, total_samples);
-						            last_num_samples_read = unpack_samples(rawinput.pf.sub.data     +   // start of raw data, ie channel 0
+                                    //                                   last_num_sample_bytes_read, total_samples);
+						            last_num_sample_bytes_read = unpack_samples(rawinput.pf.sub.data     +   // start of raw data, ie channel 0
                                                                            control_block.subint_offset, // this gets us to the requested channel 
                                                                            control_block.chanbytes,     // chanbytes does not include overlap
                                                                            control_block.polarization,
                                                                            this_tapebuffer);   			// unpack samples to the return vector   
-                                    if(control_block.vflag>=1) fprintf(stderr, "Just unpacked %ld samples from %ld bytes.  Total samples : %ld\n", 
-                                                                       last_num_samples_read, control_block.chanbytes, total_samples);
+                                    if(control_block.vflag>=1) fprintf(stderr, "Just unpacked %ld sample bytes from %ld chanbytes.  Total samples : %ld\n", 
+                                                                       last_num_sample_bytes_read, control_block.chanbytes, total_samples);
                                } else {
                                     log_messages.printf(SCHED_MSG_LOG::MSG_DEBUG,"Not to point of resumption (%ld < %ld), skipping...\n", 
                                                         control_block.currentblock, control_block.last_block_done);
@@ -465,7 +510,7 @@ int read_block(
             retval = 0;     // we do not have a new block. Perhaps we just need to open the next file in the series.
         }
 
-    //if(control_block.vflag>=1) fprintf(stderr, "last_num_samples_read %ld chanbytes %ld\n", last_num_samples_read, control_block.chanbytes);
+    //if(control_block.vflag>=1) fprintf(stderr, "last_num_sample_bytes_read %ld chanbytes %ld\n", last_num_sample_bytes_read, control_block.chanbytes);
     return(retval);
 }
 
@@ -592,7 +637,9 @@ void dump_tapebuffer(char * file_prefix, int channel) {
                 exit(1);
         }
         for(int buffer_i=0; buffer_i < tapebuffer.size(); buffer_i++) {
+fprintf(stderr, "buffer_i %d\n", buffer_i);
             for(int buffer_j=0; buffer_j < tapebuffer[buffer_i].data.size(); buffer_j++) {
+//fprintf(stderr, "buffer_i %d buffer_j %ld\n", buffer_i, buffer_j);
                 fwrite((const void *)&tapebuffer[buffer_i].data[buffer_j].real(), 1, 1, dump_fp);
                 fwrite((const void *)&tapebuffer[buffer_i].data[buffer_j].imag(), 1, 1, dump_fp);
             }
@@ -611,6 +658,17 @@ long int read_blocks_guppi(char *           file_prefix,
                            int              vflag 
 ) {
 //-------------------------------------------------------
+// Note : a buffer is push_back()'ed to tapebuffer under two conditions:
+// 1) at the end of processing a guppi block.  This is by far the most
+//      common push_back() and will result in a tapebuffer of a standard
+//      length for a given file format until we reach the desired number
+//      of samples per call. The final buffer will likely be a partial
+//      buffer.
+// 2) Upon re-entry into read_blocks_guppi() for consecutive WUGs, we 
+//      push_back() a buffer with the left-over samples in the prior guppi 
+//      block. This will be a partial buffer.  The number of samples in 
+//      this buffer plus the number of samples in the final (partial) buffer 
+//      of the prior call should be the standard length.      
 
     int retval = 0;
     static bool first_time = true;
@@ -619,7 +677,7 @@ long int read_blocks_guppi(char *           file_prefix,
 
     long reent_total_samples = 0;
 
-    static unsigned long samples_left;
+    static unsigned long sample_bytes_left;
     static double start_data_time;
     static double end_data_time;
 	static int filecnt;
@@ -672,35 +730,35 @@ long int read_blocks_guppi(char *           file_prefix,
         for(int buffer_i=0; buffer_i < tapebuffer.size(); buffer_i++) {
             reent_total_samples += tapebuffer[buffer_i].data.size();
             if(control_block.vflag>=2) {
-                fprintf(stderr, "re-entry - tapebuffer %d has %ld samples\n", buffer_i, tapebuffer[buffer_i].data.size());
+                fprintf(stderr, "re-entry (start) - tapebuffer %d has %ld samples\n", buffer_i, tapebuffer[buffer_i].data.size());
             }
         }
         total_samples = reent_total_samples;        // starting this call with thais many samples :
         if(control_block.vflag>=2) {
-            fprintf(stderr, "re-entry - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
+            fprintf(stderr, "re-entry (start) - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
         }
     }  // end first/subsequent time logic 
 
 
     // take care of any samples left over in the guppi buffer
-    if(samples_left) {
-        if(control_block.vflag>=1) fprintf(stderr, "first getting the %ld samples_left starting at location %p\n", 
-                                           samples_left, rawinput.pf.sub.data + control_block.subint_offset + control_block.chanbytes - samples_left);
-	    last_num_samples_read = unpack_samples(rawinput.pf.sub.data + control_block.subint_offset + control_block.chanbytes - samples_left, 
-                                              samples_left,                          // samples left does not include overlap
+    if(sample_bytes_left) {
+        if(control_block.vflag>=1) fprintf(stderr, "first getting the %ld sample_bytes_left starting at location %p\n", 
+                                           sample_bytes_left, rawinput.pf.sub.data + control_block.subint_offset + control_block.chanbytes - sample_bytes_left);
+	    last_num_sample_bytes_read = unpack_samples(rawinput.pf.sub.data + control_block.subint_offset + control_block.chanbytes - sample_bytes_left, 
+                                              sample_bytes_left,                          // samples left does not include overlap
                                               control_block.polarization,
                                               this_tapebuffer);   				    // unpack samples to the return vector   
         tapebuffer.push_back(this_tapebuffer);                                      // this will be a partially full buffer
         this_tapebuffer.data.clear();       
-        samples_left = 0;
-    }
-    if(control_block.vflag>=2) {
-        long reent_total_samples = 0;
-        for(int buffer_i=0; buffer_i < tapebuffer.size(); buffer_i++) {
-            reent_total_samples += tapebuffer[buffer_i].data.size();
-            fprintf(stderr, "re-entry 2 tapebuffer %d has %ld samples\n", buffer_i, tapebuffer[buffer_i].data.size());
+        sample_bytes_left = 0;
+        if(control_block.vflag>=2) {
+            long reent_total_samples = 0;
+            for(int buffer_i=0; buffer_i < tapebuffer.size(); buffer_i++) {
+                reent_total_samples += tapebuffer[buffer_i].data.size();
+                fprintf(stderr, "re-entry (after adding leftover) tapebuffer %d has %ld samples\n", buffer_i, tapebuffer[buffer_i].data.size());
+            }
+            fprintf(stderr, "re-entry (after adding leftover) - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
         }
-        fprintf(stderr, "re-entry 2 - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
     }
     // end take care of any samples left over in the guppi buffer
 
@@ -724,7 +782,7 @@ long int read_blocks_guppi(char *           file_prefix,
                     this_tapebuffer
                  );
             if(retval && this_tapebuffer.data.size() > 0) {         // if retval (OK) and no data, assume fast forward resumption
-                this_tapebuffer.header.data_size = last_num_samples_read;
+                this_tapebuffer.header.data_size = last_num_sample_bytes_read;
                 tapebuffer.push_back(this_tapebuffer);
                 if(control_block.vflag>=1) print_header(this_tapebuffer);
                 round++;
@@ -732,33 +790,29 @@ long int read_blocks_guppi(char *           file_prefix,
             }
         if(control_block.vflag>=2) {
             reent_total_samples = 0;
-//          for(int buffer_i=0; buffer_i < tapebuffer.size(); buffer_i++) {
-//              reent_total_samples += tapebuffer[buffer_i].data.size();
-//          }
-//          fprintf(stderr, "re-entry 3 - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
         }          
     } while((!(rawinput.invalid))                                                       && 
             total_samples < limit_samples);
     fprintf(stderr, "========================================================\n");
     // end read blocks until we run out of data or the numblocks request is met
 
-    samples_left = control_block.chanbytes - last_num_samples_read;             // set up for next call
+    sample_bytes_left = control_block.chanbytes - last_num_sample_bytes_read;             // set up for next call
 
     // optionally dump a full tapebuffer
     if(dumpraw) dump_tapebuffer(file_prefix, channel);
          
     if(control_block.vflag>=1) {
              fprintf(stderr, "NUM SAMPLES total %ld final buffer contains %ld of a possible %d leaving %ld for the next time through\n", 
-             total_samples, last_num_samples_read, control_block.chanbytes, control_block.chanbytes-last_num_samples_read);
+             total_samples, last_num_sample_bytes_read, control_block.chanbytes, control_block.chanbytes-last_num_sample_bytes_read);
     }
 
     if(control_block.vflag>=2) {
         reent_total_samples = 0;
         for(int buffer_i=0; buffer_i < tapebuffer.size(); buffer_i++) {
             reent_total_samples += tapebuffer[buffer_i].data.size();
-            fprintf(stderr, "re-entry 4 tapebuffer %d has %ld samples\n", buffer_i, tapebuffer[buffer_i].data.size());
+            fprintf(stderr, "finish tapebuffer %d has %ld samples\n", buffer_i, tapebuffer[buffer_i].data.size());
         }
-        fprintf(stderr, "re-entry 4 - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
+        fprintf(stderr, "finish - total_samples = %ld (%ld) in %ld tapebuffers\n", reent_total_samples, total_samples, tapebuffer.size());
     }
 
     fprintf(stderr, "getting coordinate history...\n");
@@ -803,13 +857,14 @@ unsigned long unpack_samples_2bit(unsigned char * raw, long int count, int pol, 
      // short circuit in the case of getting the total number of samples that we want.
      // The raw pointer will left where it is for the next time through.
 	 for(i=0; i < count && total_samples < limit_samples; i+=stride) {
-          // Note that we swap real/imag from the guppi ordering to get the order that the splitter expects.
-          // imag (2 bits of raw data)
-		  sample.imag( (signed char)quantlookup[( raw[i] >> (pol_shift * 2)      & 1)        +   // bit 0 or 4  
+          // TODO - for some data sets we may need to flip i and q.  Whether or not to do this
+          // should come from a boolean in the recorder_config table.
+          // real (2 bits of raw data)
+		  sample.real( (signed char)quantlookup[( raw[i] >> (pol_shift * 2)      & 1)        +   // bit 0 or 4  
                                                 ((raw[i] >> (pol_shift * 2 + 1)  & 1) * 2)]      // bit 1 or 5
                      ); 
-		  // real (2 bits of raw data)
-		  sample.real( (signed char)quantlookup[( raw[i] >> ((pol_shift+1) * 2)      & 1)      +   // bit 2 or 6 
+		  // imag (2 bits of raw data)
+		  sample.imag( (signed char)quantlookup[( raw[i] >> ((pol_shift+1) * 2)      & 1)      +   // bit 2 or 6 
                                                 ((raw[i] >> ((pol_shift+1) * 2 + 1)  & 1) * 2)]    // bit 3 or 7
                      ); 
           // add this sample to our vector
@@ -822,7 +877,8 @@ unsigned long unpack_samples_2bit(unsigned char * raw, long int count, int pol, 
 //fprintf(stderr, "old data  : %d %d  new data  :  %d %d\n", samples[2], samples[3], this_tapebuffer.data[1].real(), this_tapebuffer.data[1].imag());
 //fprintf(stderr, "old data  : %d %d  new data  :  %d %d\n", samples[count*2-2], samples[count*2-1], this_tapebuffer.data[count-1].real(), this_tapebuffer.data[count-1].imag());
 
-	 return i/stride;   // == i in this case
+	 //return i/stride;   // == i in this case
+	 return i;            // return the number of bytes (not samples) read
 }
 
 
@@ -838,15 +894,17 @@ unsigned long unpack_samples_8bit(unsigned char * raw, long int count, int pol, 
      std::complex<signed char> sample;
 
 	 for(i=0; i < count && total_samples < limit_samples; i+=stride) {
-          // Note that we swap real/imag from the guppi ordering to get the order that the splitter expects.
-          sample.imag(raw[i+pol_shift]);
-          sample.real(raw[i+1+pol_shift]);
+          // TODO - for some data sets we may need to flip i and q.  Whether or not to do this
+          // should come from a boolean in the recorder_config table.
+          sample.real(raw[i+pol_shift]);
+          sample.imag(raw[i+1+pol_shift]);
           // add this sample to our vector
           this_tapebuffer.data.push_back(sample);
           total_samples++;
 	 }
 
-	 return i/stride;
+	 //return i/stride;
+	 return i;            // return the number of bytes (not samples) read
 }
 
 

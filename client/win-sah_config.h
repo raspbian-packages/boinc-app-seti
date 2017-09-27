@@ -30,6 +30,9 @@
 #ifndef _SAH_WIN_CONFIG_H_
 #define _SAH_WIN_CONFIG_H_
 
+#if _MSC_VER ==1900
+	struct IUnknown;//R: to make clang toolchain in VS2015 happy (though it too green to be usable anyway; doesn't implement needed intrinsics)
+#endif
 #ifdef __MINGW32__
 #include <stdlib.h>
 #endif
@@ -406,7 +409,7 @@
 
 /* Define to the full name and version of this package. */
 #undef PACKAGE_STRING
-#define PACKAGE_STRING FILE_DESCRIPTION" "FILE_VERSION
+#define PACKAGE_STRING FILE_DESCRIPTION" " FILE_VERSION
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
@@ -427,8 +430,12 @@
 #elif defined(_MSC_VER)
 #if _MSC_VER == 1500
 	#define COMPILER_STRING "Visual Studio 2008/Microsoft Visual C++ 9"
+#elif _MSC_VER ==1600
+    #define COMPILER_STRING "Visual Studio 2010/Microsoft Visual C++ 10"
+#elif _MSC_VER ==1900
+    #define COMPILER_STRING "Visual Studio 2015/Microsoft Visual C++ 14"
 #else
-	#define COMPILER_STRING "Visual Studio 2010/Microsoft Visual C++ 10"
+	#define COMPILER_STRING "Visual Studio/Microsoft Visual C++"
 #endif
 #else 
 #define COMPILER_STRING "Unknown Compiler"
@@ -436,7 +443,7 @@
 #endif
 
 #ifndef CUSTOM_STRING
-#define CUSTOM_STRING "setiathome_v8 "FILE_VERSION" "COMPILER_STRING
+#define CUSTOM_STRING "setiathome_v8 " FILE_VERSION " " COMPILER_STRING
 #endif
 
 /* The size of a `long double', as computed by sizeof. */

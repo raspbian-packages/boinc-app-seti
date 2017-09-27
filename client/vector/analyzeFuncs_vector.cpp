@@ -41,7 +41,6 @@
 #ifdef _WIN32
 #define uint32_t unsigned long
 #endif
-
 #include <csignal>
 #include <cstdlib>
 #include <cmath>
@@ -262,7 +261,7 @@ void SetCapabilities(void) {
   if ((dp & 0x00000800) && avxSupported())   CPUCaps |= BA_AVX;
 #endif
 
-#elif defined(__i386__) || defined (__x86_64__)
+#elif defined(__i386__) || defined (__x86_64__) || defined(_M_X64)
   /* we're hoping to rely on signal handling to keep us out of trouble */
   CPUCaps |= (BA_MMX | BA_SSE | BA_SSE2 | BA_SSE3 | BA_3Dnow | BA_3DnowP | BA_MMX_P );
 #if defined(USE_AVX)                    
@@ -408,7 +407,7 @@ CDtb ChirpDataFuncs[]={
      avx_ChirpData_d, BA_AVX, "avx_ChirpData_d", 
 #  endif
 #endif
-#if defined(__arm__) && defined(ANDROID) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
      vfp_ChirpData, BA_VFP, "vfp_ChirpData",
 #ifdef USE_NEON
      neon_ChirpData, BA_NEON, "neon_ChirpData",
@@ -910,9 +909,22 @@ ChirpData_func ChooseChirpData() {
             int ind=TESTCHIRPIND;
             while ((j<100) && ((j<20) || (timing<(10*timer.resolution())))) {
                 memset(outdata,0,NumDataPoints*sizeof(sah_complex));
+#if 0
+		fprintf(stderr,"before Chirp test:%32s \n",ChirpDataFuncs[i].nom);
+		for(int k=0;k<3;k++){
+			fprintf(stderr,"in[%d].xy=(%7.5f,%7.5f)]\n",k,indata[k][0],indata[k][1]);
+		}
+#endif
                 timer.start();
                 rv=ChirpDataFuncs[i].func(indata,outdata,ind,MinChirpStep*ind,NumDataPoints,swi.subband_sample_rate);
                 onetime=timer.stop();
+#if 0
+		fprintf(stderr,"after Chirp test:%32s \n",ChirpDataFuncs[i].nom);
+		for(int k=0;k<3;k++){
+			fprintf(stderr,"out[%d].xy=(%7.5f,%7.5f)]\n",k,outdata[k][0],outdata[k][1]);
+		}
+#endif
+
                 timing+=onetime;
                 timings.push_back(onetime);
 #if !defined(USE_ASMLIB) && !defined(__APPLE_CC__)

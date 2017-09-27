@@ -37,23 +37,30 @@
 
 #ifdef __arm__
 /*
- * vfp_ChirpData.S
+ * neon_ChirpData.S
  * Author: Mateusz Szpakowski
  */
+
 
 #if defined(__VFP_FP__) && !defined(__SOFTFP__)
 		.syntax unified
 #endif
+
                 .arch armv7-a
                 .fpu neon
+
 #if defined(__VFP_FP__) && !defined(__SOFTFP__)
 		.eabi_attribute 27, 3
 		.eabi_attribute 28, 1
 #endif
-	
+
+/*
                 .eabi_attribute 20, 1
                 .eabi_attribute 21, 1
                 .eabi_attribute 23, 3
+*/
+
+                .eabi_attribute 23, 1
                 .eabi_attribute 24, 1
                 .eabi_attribute 25, 1
                 .eabi_attribute 26, 2
@@ -90,6 +97,7 @@
 _Z14neon_ChirpDataPA2_fS0_idid:
                 push {r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
                 vpush {d8,d9,d10,d11,d12,d13,d14,d15}
+#ifdef ANDROID   
 #define stargidx (40+64)
                 /* r0 - input data
                  * r1 - output data
@@ -98,12 +106,33 @@ _Z14neon_ChirpDataPA2_fS0_idid:
                  * sp[2] - numDataPoints
                  * sp[4-5] - sample_rate
                  */
+#else
+//R: cause few params now in registers stack should be shorter by 20 bytes
+#define stargidx (40+64)
+//R: armhf like Parallella use registers instead of stack to pass params so another expected pattern of registers use
+/*
+	r0 - input data
+	r1 - output data
+	r2 - chirprateind
+	r3 - numDataPoints
+	d0 - chirp_rate
+	d1 - sample_rate
+*/
+//R: seems r12 isn't in use in original function so use it to preserve numDataPoins value (r3)
+		mov r12,r3
+                vmov.f64 d9, d0
+		vmov.f64 d10, d1
+#endif
                 tst r2,r2
                 bne .Lrealfunc
                 mov r3,r0   // swap addresses
                 mov r0,r1
                 mov r1,r3
+#ifdef ANDROID
                 ldr r2,[sp,#stargidx+8]     // numDataPoints
+#else
+		mov r2,r12
+#endif
                 lsl r2,r2,#3
                 bl memcpy(PLT)
                 b .Lendoffunc
@@ -116,9 +145,12 @@ _Z14neon_ChirpDataPA2_fS0_idid:
                 add r4,pc,r4
                 ldr r5,.LGOT1+4
                 ldr r5,[r4,r5]
-                
+#ifdef ANDROID            
                 ldr r3,[sp,#stargidx+8]     // numDataPoints
-                
+#else
+		mov r3,r12
+#endif              
+  
                 add r6,r3,r3,lsl #1
                 lsl r6,r6,#2
                 fldd d0,[r5,#32]
@@ -131,8 +163,10 @@ _Z14neon_ChirpDataPA2_fS0_idid:
                 sub r3,r3,#8*15
                 
                 fldd d11,.Lhalfd
+#ifdef ANDROID   //R: for armhf these doubles already in registers
                 fldd d9,[sp,#stargidx]        // chirp_rate
                 fldd d10,[sp,#stargidx+16]   // sample_rate
+#endif
                 fmuld d10,d10,d10
                 fmuld d9,d9,d11
                 fdivd d9,d9,d10
@@ -142,8 +176,11 @@ _Z14neon_ChirpDataPA2_fS0_idid:
                 fcmpd d9,d11
                 fmstat
                 fnegdmi d10,d10     // negate is negative srate
-                
+#ifdef ANDROID   
                 sub sp,sp,#16+64
+#else  //R: for armhf stack has different size so attempting to account for that
+                sub sp,sp,#16+64
+#endif
                 add r7,sp,#16
                 add r11,sp,#16+32
                 fstmiad sp,{d9,d10}
@@ -569,7 +606,11 @@ _Z14neon_ChirpDataPA2_fS0_idid:
                 cmp r0,r3
                 blo .Lsmallloop
 .Lendsmallloop:
+#ifdef ANDROID
                 add sp,sp,#16+64
+#else
+                add sp,sp,#16+64
+#endif
 .Lendoffunc:
                 mov r0,#0
                 vpop {d8,d9,d10,d11,d12,d13,d14,d15}
@@ -590,26 +631,6 @@ _Z14neon_ChirpDataPA2_fS0_idid:
  * neon_FoldSubs.S
  * Author: Mateusz Szpakowski
  */
-
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.syntax unified
-#endif	
-                .arch armv7-a
-                .fpu neon
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.eabi_attribute 27, 3
-		.eabi_attribute 28, 1
-#endif
-	
-                .eabi_attribute 20, 1
-                .eabi_attribute 21, 1
-                .eabi_attribute 23, 3
-                .eabi_attribute 24, 1
-                .eabi_attribute 25, 1
-                .eabi_attribute 26, 2
-                .eabi_attribute 30, 2
-                .eabi_attribute 18, 4
-                .text
                 .align  2
                 /*****
                  * fold array by 3
@@ -2498,25 +2519,6 @@ neonFoldMain:
  * Author: Mateusz Szpakowski
  */
 
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.syntax unified
-#endif	
-                .arch armv7-a
-                .fpu neon
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.eabi_attribute 27, 3
-		.eabi_attribute 28, 1
-#endif
-	
-                .eabi_attribute 20, 1
-                .eabi_attribute 21, 1
-                .eabi_attribute 23, 3
-                .eabi_attribute 24, 1
-                .eabi_attribute 25, 1
-                .eabi_attribute 26, 2
-                .eabi_attribute 30, 2
-                .eabi_attribute 18, 4
-                .text
                 .align  2
                 .global _Z21neon_GetPowerSpectrumPA2_fPfi
                 .type   _Z21neon_GetPowerSpectrumPA2_fPfi, %function

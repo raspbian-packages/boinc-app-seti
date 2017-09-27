@@ -1,6 +1,8 @@
 Description: add some useful output debug.
---- a/client/worker.cpp
-+++ b/client/worker.cpp
+Index: boinc-app-seti/client/worker.cpp
+===================================================================
+--- boinc-app-seti.orig/client/worker.cpp
++++ boinc-app-seti/client/worker.cpp
 @@ -130,7 +130,7 @@
          fclose(f);
          if (retval) SETIERROR(retval,"from seti_parse_wu() in read_wu_state()");
@@ -10,7 +12,7 @@ Description: add some useful output debug.
  	sprintf(msg,"(%s) in read_wu_state() errno=%d\n",path.c_str(),errno);
  	SETIERROR(FOPEN_FAILED,msg);
      }
-@@ -174,15 +174,19 @@
+@@ -174,17 +174,21 @@
  #endif
  
    try {
@@ -25,12 +27,14 @@ Description: add some useful output debug.
 +    fprintf(stderr,"I: worker() - seti_do_work\n");
      retval = seti_do_work();
      if (retval) SETIERROR(retval,"from seti_do_work() in worker()");
- 
+ #if 0 //R: Set for PGO
+ 	exit(retval);
+ #else
 +    fprintf(stderr,"I: worker() - boinc_finish\n");
      boinc_finish(retval);
+ #endif
    }
-   catch (seti_error e) {
-@@ -200,6 +204,7 @@
+@@ -205,6 +209,7 @@
  #endif 
          exit(0);            // an overflow is not an app error
      } else {

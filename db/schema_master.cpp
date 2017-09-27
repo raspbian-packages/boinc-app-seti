@@ -788,8 +788,8 @@ std::string data_description_t::print_xml(int full_subtables, int show_ids, int 
 
 template <> const char * const db_table<receiver_config>::table_name="receiver_config";
 template <> const char * db_table<receiver_config>::_search_tag=table_name;
-template <> const int db_table<receiver_config>::_nfields=17;
-template <> const char * const db_table<receiver_config>::column_names[17]={"id","s4_id","name","beam_width","center_freq","latitude","longitude","elevation","diameter","az_orientation","az_corr_coeff","zen_corr_coeff","array_az_ellipse","array_za_ellipse","array_angle","min_vgc""polarization"};
+template <> const int db_table<receiver_config>::_nfields=20;
+template <> const char * const db_table<receiver_config>::column_names[20]={"id","s4_id","name","beam_width","center_freq","latitude","longitude","elevation","glat","glon","galt","diameter","az_orientation","az_corr_coeff","zen_corr_coeff","array_az_ellipse","array_za_ellipse","array_angle","min_vgc""polarization"};
 
 receiver_config::receiver_config() : 
 	db_table<receiver_config>(*this,-1),
@@ -800,6 +800,9 @@ receiver_config::receiver_config() :
 	latitude(0),
 	longitude(0),
 	elevation(0),
+	glat(0),
+	glon(0),
+	galt(0),
 	diameter(0),
 	az_orientation(0),
 	az_corr_coeff((float *)0,0,_x_csv),
@@ -824,6 +827,9 @@ receiver_config::receiver_config(const receiver_config &a) :
 	latitude(a.latitude),
 	longitude(a.longitude),
 	elevation(a.elevation),
+	glat(a.glat),
+	glon(a.glon),
+	galt(a.galt),
 	diameter(a.diameter),
 	az_orientation(a.az_orientation),
 	az_corr_coeff(a.az_corr_coeff),
@@ -868,6 +874,9 @@ receiver_config &receiver_config::operator =(const receiver_config &a) {
 		latitude=a.latitude;
 		longitude=a.longitude;
 		elevation=a.elevation;
+		glat=a.glat;
+		glon=a.glon;
+		galt=a.galt;
 		diameter=a.diameter;
 		az_orientation=a.az_orientation;
 		{
@@ -898,7 +907,7 @@ receiver_config &receiver_config::operator =(const receiver_config &a) {
 std::string receiver_config::update_format() const
 {	std::ostringstream rv("");
 
-	for (int i=2;i<17;i++) rv << "?,";
+	for (int i=2;i<20;i++) rv << "?,";
 	rv << "?";
 	return rv.str();
 }
@@ -911,7 +920,7 @@ std::string receiver_config::insert_format() const
 std::string receiver_config::select_format() const
 {
 std::string rv("");
-for (int i=0; i<16;i++) rv+="?,";
+for (int i=0; i<19;i++) rv+="?,";
 rv+="?";
 return rv;
 }
@@ -935,6 +944,12 @@ std::string receiver_config::print(int full_subtables, int show_ids, int no_refs
 	rv << longitude;
 	rv << ',';
 	rv << elevation;
+	rv << ',';
+	rv << glat;
+	rv << ',';
+	rv << glon;
+	rv << ',';
+	rv << galt;
 	rv << ',';
 	rv << diameter;
 	rv << ',';
@@ -998,6 +1013,9 @@ std::string receiver_config::print_xml(int full_subtables, int show_ids, int no_
 	rv << xml_indent() << "<latitude>" << latitude << "</latitude>\n";
 	rv << xml_indent() << "<longitude>" << longitude << "</longitude>\n";
 	rv << xml_indent() << "<elevation>" << elevation << "</elevation>\n";
+	rv << xml_indent() << "<glat>" << glat << "</glat>\n";
+	rv << xml_indent() << "<glon>" << glon << "</glon>\n";
+	rv << xml_indent() << "<galt>" << galt << "</galt>\n";
 	rv << xml_indent() << "<diameter>" << diameter << "</diameter>\n";
 	rv << xml_indent() << "<az_orientation>" << az_orientation << "</az_orientation>\n";
 	if (az_corr_coeff.size()) {
@@ -1088,6 +1106,24 @@ std::string receiver_config::print_xml(int full_subtables, int show_ids, int no_
 	        do { pos++; } while(sub[pos]=='\n');
 	        std::istringstream in(sub.c_str()+pos);
 	        in >> elevation;
+	      }
+	    if (extract_xml_record(field,"glat",sub)) {
+	        pos=sub.find(">");
+	        do { pos++; } while(sub[pos]=='\n');
+	        std::istringstream in(sub.c_str()+pos);
+	        in >> glat;
+	      }
+	    if (extract_xml_record(field,"glon",sub)) {
+	        pos=sub.find(">");
+	        do { pos++; } while(sub[pos]=='\n');
+	        std::istringstream in(sub.c_str()+pos);
+	        in >> glon;
+	      }
+	    if (extract_xml_record(field,"galt",sub)) {
+	        pos=sub.find(">");
+	        do { pos++; } while(sub[pos]=='\n');
+	        std::istringstream in(sub.c_str()+pos);
+	        in >> galt;
 	      }
 	    if (extract_xml_record(field,"diameter",sub)) {
 	        pos=sub.find(">");
@@ -1199,17 +1235,29 @@ std::string receiver_config::print_xml(int full_subtables, int show_ids, int no_
 	    }
 	  {  
 	        std::istringstream row(*(s[8]));
-	        row >> diameter;
+	        row >> glat;
 	    }
 	  {  
 	        std::istringstream row(*(s[9]));
+	        row >> glon;
+	    }
+	  {  
+	        std::istringstream row(*(s[10]));
+	        row >> galt;
+	    }
+	  {  
+	        std::istringstream row(*(s[11]));
+	        row >> diameter;
+	    }
+	  {  
+	        std::istringstream row(*(s[12]));
 	        row >> az_orientation;
 	    }
 	  {  
 	  std::string::size_type p,q;
 	  int i;
 	    az_corr_coeff.clear();
-	      SQL_ROW tmp(s[10]); 
+	      SQL_ROW tmp(s[13]); 
 	        for (i=0;i<tmp.argc();i++) {
 	          std::istringstream in(*(tmp[i]));
 	          float tmp0;
@@ -1221,7 +1269,7 @@ std::string receiver_config::print_xml(int full_subtables, int show_ids, int no_
 	  std::string::size_type p,q;
 	  int i;
 	    zen_corr_coeff.clear();
-	      SQL_ROW tmp(s[11]); 
+	      SQL_ROW tmp(s[14]); 
 	        for (i=0;i<tmp.argc();i++) {
 	          std::istringstream in(*(tmp[i]));
 	          float tmp0;
@@ -1230,29 +1278,29 @@ std::string receiver_config::print_xml(int full_subtables, int show_ids, int no_
 	      }
 	    }
 	  {  
-	        std::istringstream row(*(s[12]));
+	        std::istringstream row(*(s[15]));
 	        row >> array_az_ellipse;
 	    }
 	  {  
-	        std::istringstream row(*(s[13]));
+	        std::istringstream row(*(s[16]));
 	        row >> array_za_ellipse;
 	    }
 	  {  
-	        std::istringstream row(*(s[14]));
+	        std::istringstream row(*(s[17]));
 	        row >> array_angle;
 	    }
 	  {  
-	        std::istringstream row(*(s[15]));
+	        std::istringstream row(*(s[18]));
 	        row >> min_vgc;
 	    }
 	  {  
-	        strncpy(polarization,s[16]->c_str(),32);
+	        strncpy(polarization,s[19]->c_str(),32);
 	        polarization[31]=0;
 	    }
 	      }
 
 	void receiver_config::parse(const std::string &s) {
-	      SQL_ROW row(&s,17);
+	      SQL_ROW row(&s,20);
 	      parse(row);
 	      }
 

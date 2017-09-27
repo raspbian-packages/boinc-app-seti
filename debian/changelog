@@ -1,9 +1,44 @@
-boinc-app-seti (8.00~svn3363-4+rpi1) buster-staging; urgency=medium
+boinc-app-seti (8.00~svn3701-1+rpi1) buster-staging; urgency=medium
 
   [changes brought forward from 7.28~svn2633-3+rpi1 by Peter Michael Green <plugwash@raspbian.org> at Sun, 23 Nov 2014 15:14:28 +0000]
   * Disable neon
 
- -- Raspbian forward porter <root@raspbian.org>  Wed, 28 Jun 2017 22:54:49 +0000
+ -- Raspbian forward porter <root@raspbian.org>  Wed, 27 Sep 2017 02:09:24 +0000
+
+boinc-app-seti (8.00~svn3701-1) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Mon, 11 Sep 2017 19:33:46 +0200
+
+boinc-app-seti (8.00~svn3701-1~exp1) experimental; urgency=medium
+
+  * New upstream release, patch refresh
+  * Bump compat level to 10.
+  * Try to fix arm64 build.
+  * Bump std-version to 4.1.0, no changes required.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 11 Apr 2017 14:24:24 +0200
+
+boinc-app-seti (8.00~svn3643-1~exp3) experimental; urgency=medium
+
+  * Introduced LTO (Link Time Optimization).
+
+ -- Steffen Moeller <moeller@debian.org>  Tue, 11 Apr 2017 00:23:22 +0200
+
+boinc-app-seti (8.00~svn3643-1~exp2) experimental; urgency=medium
+
+  * Moved to debhelper 10, eliminating invocation of dh_autoreconf (Gianfranco and Steffen)
+  * Gave explicit reference to libboinc-app7 (>= 7.6.33) (Closes: #825374).
+
+ -- Steffen Moeller <moeller@debian.org>  Mon, 10 Apr 2017 18:14:54 +0200
+
+boinc-app-seti (8.00~svn3643-1~exp1) experimental; urgency=medium
+
+  * New upstream release, drop upstream fix.
+  * Patch refresh
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 04 Apr 2017 10:14:51 +0200
 
 boinc-app-seti (8.00~svn3363-4) unstable; urgency=medium
 

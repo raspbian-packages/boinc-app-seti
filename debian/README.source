@@ -53,3 +53,8 @@ About graphics:
     no-graphics one in boinc-app-seti.
  3. Mark boinc-app-seti and boinc-app-seti-graphics as in conflict with
     each other.
+
+Patches:
+
+   Please inspect debian/patches/README.patches and the first few descriptive
+   lines of each patch of interest.

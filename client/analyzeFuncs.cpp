@@ -33,10 +33,10 @@
 
 #if defined(USING_XCODE) || defined(_WIN32)
 #include "version.h"
-const char *BOINC_PACKAGE_STRING="libboinc: "BOINC_VERSION_STRING;
+const char *BOINC_PACKAGE_STRING="libboinc: " BOINC_VERSION_STRING;
 #else
 #include "config.h"
-const char *BOINC_PACKAGE_STRING="libboinc: "PACKAGE_STRING;
+const char *BOINC_PACKAGE_STRING="libboinc: " PACKAGE_STRING;
 #endif
 
 #undef PACKAGE_STRING
@@ -790,7 +790,7 @@ int seti_analyze (ANALYSIS_STATE& state) {
             SETIERROR(WRITE_FAILED,"from outfile.printf (best triplet) in seti_analyze()");
         }
     }
-    retval=outfile.printf("<setiathome_version>"PACKAGE_VERSION"</setiathome_version>\n");
+    retval=outfile.printf("<setiathome_version>" PACKAGE_VERSION "</setiathome_version>\n");
 
 #ifdef BOINC_APP_GRAPHICS
     if (sah_graphics) strcpy(sah_graphics->status, "Work unit done");

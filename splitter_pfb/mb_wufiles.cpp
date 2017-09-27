@@ -143,7 +143,7 @@ int make_wu_headers(std::vector<dr2_compact_block_t> &tapebuffer,
   double numtrip=std::min(3.25215e+12/std::min(wugrp.data_desc.true_angle_range,10.0),1.44774e+13);
 
   // check for VLAR workunits
-  if (wugrp.data_desc.true_angle_range < 1.2*wugrp.receiver_cfg->beam_width) {
+  if (wugrp.data_desc.true_angle_range < 2.4*wugrp.receiver_cfg->beam_width) {
     group_is_vlar=true;
   } else {
     group_is_vlar=false;

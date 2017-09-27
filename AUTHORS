@@ -23,6 +23,25 @@ Stevenj G. Johnson <stevenj at alum.mit.edu>
 Stefan Kral <skral at fftw.org> wrote genfft-k7/*.ml*, which was
 added in fftw-3.0 and removed in fftw-3.2.
 
+Additional authors of Astropulse:
+Joshua Von Korff <vonkorff at ssl.berkeley.edu>
+Paul Demorest <demorest at astro.berkeley.edu>
+
+OpenCL development by:
+Raistmer
+Urs Echternacht
+Frizz
+
+X-Branch CUDA by:
+Jason Richard Groothuis ( jgopt.org, contact at jgopt dot org ), 
+in collaboration with Josef Segur ( Lunatics.kwsn.info )
+Linux porting by Aaron Haviland.
+
+Original CUDA development by:
+Przemyslaw Zych (NVIDIA)
+Scott Le Grand (NVIDIA)
+Bob Johnston (NVIDIA)
+
 Authors of fft8g.[cpp,h]
 Takuya Ooura <ooura at kurims.kyoto-u.ac.jp>
 Eric J. Korpela <korpela at ssl.berkeley.edu>

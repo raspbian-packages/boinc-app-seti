@@ -12,6 +12,7 @@ BOINC_INC	= -I$(BOINCDIR) -I$(BOINCDIR)/api -I$(BOINCDIR)/lib -I$(BOINCDIR)/sche
 BOINC_LIBS 	=  -L$(BOINCDIR)/sched -lsched @MYSQL_LIBS@ @PTHREAD_LIBS@ -L$(BOINCDIR)/lib -lboinc -L$(SSLDIR) -lcrypto -lssl
 HEALPIX_INC     = -I$(HEALPIX)/include 
 HEALPIX_LIBS    = -L$(HEALPIX)/lib -lchealpix -lhealpix_cxx -lcxxsupport
+SYSLIBS 	= -larmadillo
 
 #bin_PROGRAMS = sah_assimilator
 noinst_PROGRAMS = sah_assimilator
@@ -30,5 +31,5 @@ sah_assimilator_SOURCES = \
 
 sah_assimilator_CFLAGS = $(AM_CFLAGS) $(BOINC_INC) $(HEALPIX_INC) $(SETILIB_CFLAGS) $(MYSQL_CFLAGS) $(INFORMIX_CFLAGS) -I.. -I../db $(PTHREAD_CFLAGS) -I../client -I../validate
 sah_assimilator_CXXFLAGS = $(AM_CXXFLAGS) $(BOINC_INC) $(SETILIB_CFLAGS) $(HEALPIX_INC) $(MYSQL_CFLAGS) $(INFORMIX_CFLAGS) -I.. -I../db $(PTHREAD_CFLAGS) -I../client -I../validate
-sah_assimilator_LDADD =  $(PTHREAD_CFLAGS) $(BOINC_LIBS) $(SETILIB_LIBS) $(MYSQL_LIBS) $(INFORMIX_LIBS) $(CLIBS) $(HEALPIX_LIBS)
+sah_assimilator_LDADD =  $(PTHREAD_CFLAGS) $(BOINC_LIBS) $(SETILIB_LIBS) $(MYSQL_LIBS) $(INFORMIX_LIBS) $(CLIBS) $(HEALPIX_LIBS) $(SYSLIBS)
 

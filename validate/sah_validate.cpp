@@ -45,6 +45,13 @@ void VALIDATE_STATS::print() {
 
 VALIDATE_STATS validate_stats;
 
+// the init and usage functions are required by boinc
+int validate_handler_init(int, char**) {
+    return 0;
+}
+void validate_handler_usage() {
+}
+
 // check_set() is called from BOINC code and is passed a vector of all
 // received results for work unit.  check_set() determines the canonical
 // result and flags each result as to whether it is similar enough to the

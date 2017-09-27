@@ -175,6 +175,7 @@ class db_table : public track_mem<T> {
 template <typename T>
 row_cache<T> db_table<T>::cache;
 
+#ifndef NEBULA
 template <typename T, typename ID_TYPE=long>
 class db_reference {
   private:
@@ -202,6 +203,82 @@ db_reference<T,ID_TYPE>::db_reference(ID_TYPE req_id) : id(*(ID_TYPE *)(&(r.id))
   id=req_id;
 }
 
+template <typename T,typename ID_TYPE>
+db_reference<T,ID_TYPE> &db_reference<T,ID_TYPE>::operator =(const T &t) {
+  if (&id != &(t.id)) {
+    r=t;
+  }
+  return *this;
+}
+
+template <typename T,typename ID_TYPE>
+db_reference<T,ID_TYPE> &db_reference<T,ID_TYPE>::operator =(const db_reference<T,ID_TYPE> &t) {
+  if (&id != &(t.id)) {
+    r=t.r;
+  }
+  return *this;
+}
+
+template <typename T, typename ID_TYPE>
+db_reference<T,ID_TYPE>::operator T() const {
+  return r;
+}
+
+template <typename T, typename ID_TYPE>
+T *db_reference<T,ID_TYPE>::operator ->() {
+  return &r;
+}
+
+template <typename T, typename ID_TYPE>
+const T *db_reference<T,ID_TYPE>::operator ->() const {
+  return &r;
+}
+
+template <typename T, typename ID_TYPE>
+std::string db_reference<T,ID_TYPE>::print(int full_subtables, int show_ids, int no_refs) const {
+  if (full_subtables) {
+    return r.print(full_subtables,show_ids,no_refs);
+  } else {
+    char buf[256];
+    sprintf(buf,"%" INT8_FMT,INT8_PRINT_CAST(sqlint8_t(r.id)));
+    return std::string(buf);
+  }
+}
+
+template <typename T, typename ID_TYPE>
+std::string db_reference<T,ID_TYPE>::print_xml(int full_subtables, int show_ids, int no_refs, const char *tag) const {
+  if (full_subtables) {
+    return r.print_xml(full_subtables,show_ids,no_refs,tag);
+  } else {
+    char buf[256];
+    sprintf(buf,"<id>%" INT8_FMT "</id>",INT8_PRINT_CAST(sqlint8_t(r.id)));
+    return std::string(buf);
+  }
+}
+
+template <typename T, typename ID_TYPE>
+void db_reference<T,ID_TYPE>::parse(const std::string &buf) {
+  r.parse(buf);
+}
+
+template <typename T, typename ID_TYPE>
+void db_reference<T,ID_TYPE>::parse(const SQL_ROW &buf) {
+  r.parse(buf);
+}
+
+template <typename T, typename ID_TYPE>
+void db_reference<T,ID_TYPE>::parse_xml(std::string &buf, const char *tag) {
+  r.parse_xml(buf,tag);
+}
+
+template <typename T, typename ID_TYPE>
+std::ostream &operator <<(std::ostream &o, const db_reference<T,ID_TYPE> &a) {
+  o << a.print_xml();
+  return o;
+}
+
+#endif // NEBULA
+
 template <typename T>
 db_type<T>::db_type(T &t) : track_mem<T>(T::type_name), me(&t) {}
 
@@ -222,21 +299,6 @@ db_type<T>::operator T() {
 template <typename T>
 db_table<T>::operator T() {
   return *me;
-}
-
-template <typename T, typename ID_TYPE>
-db_reference<T,ID_TYPE>::operator T() const {
-  return r;
-}
-
-template <typename T, typename ID_TYPE>
-T *db_reference<T,ID_TYPE>::operator ->() {
-  return &r;
-}
-
-template <typename T, typename ID_TYPE>
-const T *db_reference<T,ID_TYPE>::operator ->() const {
-  return &r;
 }
 
 #ifndef CLIENT
@@ -488,12 +550,6 @@ sqlint8_t db_table<T>::count(const std::string &where) {
   
 #endif
 
-template <typename T, typename ID_TYPE>
-std::ostream &operator <<(std::ostream &o, const db_reference<T,ID_TYPE> &a) {
-  o << a.print_xml();
-  return o;
-}
-
 template <typename T>
 const char *db_type<T>::search_tag(const char *s) {
   if (s) {
@@ -523,43 +579,6 @@ template <typename T>
 std::string db_type<T>::print_xml(int full_subtables, int show_ids, int no_refs,
     const char *tag) const {
   return me->print_xml(full_subtables,show_ids,no_refs,tag);
-}
-
-template <typename T, typename ID_TYPE>
-std::string db_reference<T,ID_TYPE>::print(int full_subtables, int show_ids, int no_refs) const {
-  if (full_subtables) {
-    return r.print(full_subtables,show_ids,no_refs);
-  } else {
-    char buf[256];
-    sprintf(buf,"%"INT8_FMT,INT8_PRINT_CAST(sqlint8_t(r.id)));
-    return std::string(buf);
-  }
-}
-
-template <typename T, typename ID_TYPE>
-std::string db_reference<T,ID_TYPE>::print_xml(int full_subtables, int show_ids, int no_refs, const char *tag) const {
-  if (full_subtables) {
-    return r.print_xml(full_subtables,show_ids,no_refs,tag);
-  } else {
-    char buf[256];
-    sprintf(buf,"<id>%"INT8_FMT"</id>",INT8_PRINT_CAST(sqlint8_t(r.id)));
-    return std::string(buf);
-  }
-}
-
-template <typename T, typename ID_TYPE>
-void db_reference<T,ID_TYPE>::parse(const std::string &buf) {
-  r.parse(buf);
-}
-
-template <typename T, typename ID_TYPE>
-void db_reference<T,ID_TYPE>::parse(const SQL_ROW &buf) {
-  r.parse(buf);
-}
-
-template <typename T, typename ID_TYPE>
-void db_reference<T,ID_TYPE>::parse_xml(std::string &buf, const char *tag) {
-  r.parse_xml(buf,tag);
 }
 
 template <typename T>
@@ -592,22 +611,6 @@ db_table<T> &db_table<T>::operator =(const db_table<T> &t) {
   if (this != &t) {
     *me=*(t.me);
     cursor=-1;
-  }
-  return *this;
-}
-
-template <typename T,typename ID_TYPE>
-db_reference<T,ID_TYPE> &db_reference<T,ID_TYPE>::operator =(const T &t) {
-  if (&id != &(t.id)) {
-    r=t;
-  }
-  return *this;
-}
-
-template <typename T,typename ID_TYPE>
-db_reference<T,ID_TYPE> &db_reference<T,ID_TYPE>::operator =(const db_reference<T,ID_TYPE> &t) {
-  if (&id != &(t.id)) {
-    r=t.r;
   }
   return *this;
 }

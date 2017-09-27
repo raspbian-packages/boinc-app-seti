@@ -18,7 +18,7 @@ LINKOPTIONS=-Xlinker -R -Xlinker $(INFORMIXDIR)/lib:$(INFORMIXDIR)/lib/esql:$(LD
 AM_CFLAGS= -g -O3 -Wall $(INCLUDE_DIRS) -DUSE_INFORMIX @PTHREAD_CFLAGS@ -ISETILIB_PATH/include
 
 
-SYSLIBS = -lcrypto -ldl
+SYSLIBS = -lcrypto -ldl -larmadillo
 
 BOINCLIBS= -L$(BOINCDIR)/sched -lsched @MYSQL_LIBS@ @PTHREAD_LIBS@ -L$(BOINCDIR)/lib -lboinc_crypt -lboinc -L$(SSLDIR) -lcrypto -lssl
 

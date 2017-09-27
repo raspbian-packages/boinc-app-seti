@@ -5,9 +5,8 @@ Maintainer: Debian BOINC Maintainers <pkg-boinc-devel@lists.alioth.debian.org>
 Uploaders: Steffen Moeller <moeller@debian.org>,
            Guo Yixuan (郭溢譞) <culu.gyx@gmail.com>,
            Gianfranco Costamagna <locutusofborg@debian.org>
-Standards-Version: 3.9.8
-Build-Depends: debhelper (>= 9),
-               dh-autoreconf,
+Standards-Version: 4.1.0
+Build-Depends: debhelper (>= 10),
                dpkg-dev (>= 1.16.1.1),
                freeglut3-dev,
                libboinc-app-dev,
@@ -21,7 +20,7 @@ Homepage: http://setiathome.berkeley.edu/
 
 Package: boinc-app-seti
 Architecture: any
-Depends: boinc-client, ${misc:Depends}, ${shlibs:Depends}
+Depends: boinc-client, libboinc-app7 (>= 7.6.33), ${misc:Depends}, ${shlibs:Depends}
 Suggests: boinc-manager
 Conflicts: boinc-app-seti-graphics
 Description: SETI@home application for the BOINC client
@@ -50,7 +49,7 @@ Description: SETI@home application for the BOINC client
 
 Package: boinc-app-seti-graphics
 Architecture: any
-Depends: boinc-client, ${misc:Depends}, ${shlibs:Depends}
+Depends: boinc-client, libboinc-app7 (>= 7.6.33), ${misc:Depends}, ${shlibs:Depends}
 Suggests: boinc-manager
 Conflicts: boinc-app-seti
 Description: SETI@home application for the BOINC client (with graphics)

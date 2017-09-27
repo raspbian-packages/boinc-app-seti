@@ -75,7 +75,7 @@ inline double fastfrac(double val, double roundVal) {
         : "=&t" (val)
         : "0" (val), "f" (roundVal), "f" (val)
     );
-#elif defined(_WIN64) || defined (__arm__)
+#elif defined(_WIN64)//R: doesn't correctly work for ARM
     val -= ((val + roundVal) - roundVal);  // TODO: ADD CHECK THAT THIS WORKS
 #else
     val -= floor(val + 0.5);

@@ -95,8 +95,8 @@ inline int quantize(float f,float stddev,int num_bits) {
         if (f<0) return 0;
         return static_cast<int>(round(f));
     case 8:
-        f*=(64.0/stddev);
-        if (f>127) return 127;
+        f*=(24.0/stddev);
+        if (f>127) return 128;
         if (f<-127) return -127;
         return static_cast<int>(round(f));
     default:

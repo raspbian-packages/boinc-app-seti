@@ -50,10 +50,13 @@
 		.eabi_attribute 27, 3
 		.eabi_attribute 28, 1
 #endif
-	
+
+/*	
                 .eabi_attribute 20, 1
                 .eabi_attribute 21, 1
                 .eabi_attribute 23, 3
+*/
+                .eabi_attribute 23, 1
                 .eabi_attribute 24, 1
                 .eabi_attribute 25, 1
                 .eabi_attribute 26, 2
@@ -75,8 +78,9 @@
                 .global _Z13vfp_ChirpDataPA2_fS0_idid
                 .type   _Z13vfp_ChirpDataPA2_fS0_idid, %function
 _Z13vfp_ChirpDataPA2_fS0_idid:
-                push {r4,r5,r6,r7,r8,lr}
+                push {r4,r5,r6,r7,r8,r9,lr}
                 vpush {d8,d9,d10,d11,d12,d13,d14,d15}
+#ifdef ANDROID
 #define stargidx (24+64)
                 /* r0 - input data
                  * r1 - output data
@@ -85,12 +89,30 @@ _Z13vfp_ChirpDataPA2_fS0_idid:
                  * sp[2] - numDataPoints
                  * sp[4-5] - sample_rate
                  */
+#else //R: armhf pass params in registers instead
+                /* r0 - input data
+                 * r1 - output data
+                 * r2 - chirprateind
+                 * d0 - chirp_rate
+                 * r3 - numDataPoints (stored in r9 for function lifetime)
+                 * d1 - sample_rate
+                 */
+
+		mov r9,r3
+		vmov.f64 d9,d0
+		vmov.f64 d10,d1
+#endif
+
                 tst r2,r2
                 bne .Lrealfunc
                 mov r3,r0   // swap addresses
                 mov r0,r1
                 mov r1,r3
+#ifdef ANDROID
                 ldr r2,[sp,#stargidx+8]     // numDataPoints
+#else
+		mov r2,r9
+#endif
                 lsl r2,r2,#3
                 bl memcpy(PLT)
                 b .Lendoffunc
@@ -103,9 +125,11 @@ _Z13vfp_ChirpDataPA2_fS0_idid:
                 add r4,pc,r4
                 ldr r5,.LGOT1+4
                 ldr r5,[r4,r5]
-                
+#ifdef ANDROID            
                 ldr r3,[sp,#stargidx+8]     // numDataPoints
-                
+#else
+		mov r3,r9
+#endif                
                 add r6,r3,r3,lsl #1
                 lsl r6,r6,#2
                 fldd d0,[r5,#32]
@@ -118,8 +142,11 @@ _Z13vfp_ChirpDataPA2_fS0_idid:
                 sub r3,r3,#8*7
                 
                 fldd d11,.Lhalfd
+#ifdef ANDROID
                 fldd d9,[sp,#stargidx]        // chirp_rate
                 fldd d10,[sp,#stargidx+16]   // sample_rate
+#endif //R: for armhf d9 and d10 already loaded 
+
                 fmuld d10,d10,d10
                 fmuld d9,d9,d11
                 fdivd d9,d9,d10
@@ -610,7 +637,7 @@ _Z13vfp_ChirpDataPA2_fS0_idid:
 .Lendoffunc:
                 mov r0,#0
                 vpop {d8,d9,d10,d11,d12,d13,d14,d15}
-                pop {r4,r5,r6,r7,r8,lr}
+                pop {r4,r5,r6,r7,r8,r9,lr}
                 bx lr
                 
                 .align  2
@@ -624,25 +651,6 @@ _Z13vfp_ChirpDataPA2_fS0_idid:
  * Author: Mateusz Szpakowski
  */
 
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.syntax unified
-#endif	
-                .arch armv6
-                .fpu vfp
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.eabi_attribute 27, 3
-		.eabi_attribute 28, 1
-#endif
-	
-                .eabi_attribute 20, 1
-                .eabi_attribute 21, 1
-                .eabi_attribute 23, 3
-                .eabi_attribute 24, 1
-                .eabi_attribute 25, 1
-                .eabi_attribute 26, 2
-                .eabi_attribute 30, 2
-                .eabi_attribute 18, 4
-                .text
                 .align  2
                 /*****
                  * fold array by 3 
@@ -2133,26 +2141,6 @@ vfpFoldMain:
  * vfp_GetPowerSpectrum.S
  * Author: Mateusz Szpakowski
  */
-
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.syntax unified
-#endif	
-                .arch armv6
-                .fpu vfp
-#if defined(__VFP_FP__) && !defined(__SOFTFP__)
-		.eabi_attribute 27, 3
-		.eabi_attribute 28, 1
-#endif
-	
-                .eabi_attribute 20, 1
-                .eabi_attribute 21, 1
-                .eabi_attribute 23, 3
-                .eabi_attribute 24, 1
-                .eabi_attribute 25, 1
-                .eabi_attribute 26, 2
-                .eabi_attribute 30, 2
-                .eabi_attribute 18, 4
-                .text
                 .align  2
                 .global _Z20vfp_GetPowerSpectrumPA2_fPfi
                 .type   _Z20vfp_GetPowerSpectrumPA2_fPfi, %function

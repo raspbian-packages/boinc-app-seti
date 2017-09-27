@@ -32,7 +32,7 @@
 
 // the boinc assimilator makes these available
 extern SCHED_CONFIG config;
-extern bool noinsert;		
+//extern bool noinsert;		
 
 const double  D2R =  0.017453292;
 const int fpix_res = 10;            // Hz
@@ -42,6 +42,14 @@ const float bad_fp_val_marker = -91.0;
 struct timespec nanotime;
 
 //inline long round(double x) {return long(floor(x + 0.5f));}
+
+// the init and usage functions are required by boinc
+int assimilate_handler_init(int, char**) {
+    return 0;
+}
+void assimilate_handler_usage() {
+}
+
 
 int populate_seti_result(
 	result& sah_result, 
@@ -143,12 +151,12 @@ int assimilate_handler(
 	}
     	// Sometimes we want to perform all assimilation functions
     	// *except* insertion into the science master DB.
-    	if (noinsert) {
-      		log_messages.printf(SCHED_MSG_LOG::MSG_NORMAL,
-      		"[%s] assimilator is in noinsert mode.\n",
-      		boinc_wu.name
-      		);
-    	}
+    	//if (noinsert) {
+        //		log_messages.printf(SCHED_MSG_LOG::MSG_NORMAL,
+        //		"[%s] assimilator is in noinsert mode.\n",
+        //		boinc_wu.name
+        //		);
+    	//}
     } else {
 /*
 	retval = db_change(sah_config.scidb_name);
@@ -166,7 +174,7 @@ int assimilate_handler(
         }
 */
    }
-   if (noinsert) return 0;   	// Note that this will result in the WU being marked as assimilated - 
+   //if (noinsert) return 0;   	// Note that this will result in the WU being marked as assimilated - 
 				// we will not see it again.
 
     // translate seti wuid for thos wus that changed ids during the DB merge

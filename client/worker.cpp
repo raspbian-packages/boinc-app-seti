@@ -185,9 +185,12 @@ void worker() {
     fprintf(stderr,"I: worker() - seti_do_work\n");
     retval = seti_do_work();
     if (retval) SETIERROR(retval,"from seti_do_work() in worker()");
-
+#if 0 //R: Set for PGO
+	exit(retval);
+#else
     fprintf(stderr,"I: worker() - boinc_finish\n");
     boinc_finish(retval);
+#endif
   }
   catch (seti_error e) {
     if (e == RESULT_OVERFLOW) {
@@ -198,7 +201,9 @@ void worker() {
         remaining=0;
         boinc_fraction_done(progress);
         checkpoint(true);      // force a checkpoint
-        boinc_finish(0);
+#if 1 //R: set 0 for PGO logging test
+		boinc_finish(0);
+#endif
 #ifdef USE_MANUAL_CALLSTACK
         call_stack.exit();
 #endif 

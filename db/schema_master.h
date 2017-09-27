@@ -21,7 +21,7 @@ inline int db_open() { return (db_is_open=1); }
 inline int db_close() { return !(db_is_open=0); }
 inline int db_change() { return (db_is_open=1); }
 #ifdef NEBULA
-typedef sqlint8_t long;
+typedef long sqlint8_t;
 template <typename T, typename ID_TYPE=long> 
 struct db_reference {
   ID_TYPE id;
@@ -29,6 +29,7 @@ struct db_reference {
   void parse(const std::string &buf) {};
   std::string print(int full_subtables=0, int show_ids=1, int no_refs=0) const {};
   std::string print_xml(int full_subtables=1, int show_ids=0, int no_refs=1, const char *tag=0) const {};
+  void parse(const SQL_ROW&) {};
 };
 #endif //NEBULA
 
@@ -150,6 +151,9 @@ class  receiver_config  : public db_table<receiver_config> {
 	double  latitude;
 	double  longitude;
 	double  elevation;
+	double  glat;
+	double  glon;
+	double  galt;
 	double  diameter;
 	double  az_orientation;
 	sqlblob<float>  az_corr_coeff ;

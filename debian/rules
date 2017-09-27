@@ -107,15 +107,10 @@ SETIEXTRAFLAGS= --disable-altivec
 # Link-time optimisation demands knowledge about all CFLAGS both at
 # compile time (as represented by CFLAGS and CXXFLAGS) but also at
 # at link time.
-#ifeq (,$(findstring nolto,$(DEB_BUILD_OPTIONS)))
-# $(info I: Activating LinkTimeOptimisation)
-# SETIEXTRAFLAGS += -flto
-# LDFLAGS += -flto
-# #CXX := $(CXX) $(CXXFLAGS)
-# #CC := $(CC) $(CFLAGS)
-# AR := gcc-ar
-# RANLIB := gcc-ranlib
-#endif
+ifeq (,$(findstring nolto,$(DEB_BUILD_OPTIONS)))
+ $(info I: Activating LinkTimeOptimisation)
+ SETIEXTRAFLAGS += --enable-lto
+endif
 
 # Although all source file are C++, some handwritten rules in
 # client/Makefile.am seem to use CFLAGS only.
@@ -131,7 +126,7 @@ APP_INFO_VERSION = $(subst .,,$(UPSTREAM_VERSION))
 
 
 %:
-	dh $@ --parallel --with autoreconf
+	dh $@
 
 CFGFLAGS = \
 	  --disable-static-client \
@@ -198,7 +193,7 @@ get-orig-source:
 	cd $(origDir); \
 	EXP=/tmp/download-seti; \
 	nice="nice -5"; if [ -x /usr/bin/ionice ]; then nice="$$nice ionice -c 3"; fi ; \
-	$$nice wget -O$$EXP "http://git.debian.org/?p=pkg-boinc/scripts.git;a=blob_plain;f=export-seti;hb=HEAD" --quiet && \
+	$$nice wget -O$$EXP "https://anonscm.debian.org/cgit/pkg-boinc/scripts.git/plain/export-seti" --quiet && \
 	chmod +x $$EXP && $$EXP && rm -f $$EXP
 
 .PHONY: get-orig-source

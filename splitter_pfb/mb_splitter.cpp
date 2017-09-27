@@ -108,12 +108,14 @@ int beam;
 int pol;
 int alfa = 0; 
 int gbt = 0;
+int parkes = 0;
 int channel;
 int raw_bit_depth = 0; // bit depth of raw data (required for guppi data).  A depth of N means N real, N imag
 int samples_per_byte;  // real samples/byte
 int dumpsubband = -1;  // default to not dumping
 int dumpraw = 0;       // default to not dumping
 enum file_types {dr2, guppi};
+enum guppi_types {guppi_gbt, guppi_parkes};
 int useanalysiscfgid = 0;
 int usereceivercfgid = 0;
 int userecordercfgid = 0;
@@ -163,9 +165,9 @@ int process_command_line(int argc, char *argv[],char **tape_device,
                          int *norewind, int *startblock, int *resumetape,
                          int *nodb, int *dataclass, int *atnight,
                          int *max_wus_ondisk, char **projectdir, int *iters, 
-                         int *beam, int *pol, int *alfa, int *gbt, int *channel, 
-                         int *raw_bit_depth, int *dumpsubband, int *dumpraw,
-                         int *useanalysiscfgid, int *usereceivercfgid,
+                         int *beam, int *pol, int *alfa, int *gbt, int *parkes, 
+						 int *channel, int *raw_bit_depth, int *dumpsubband, 
+						 int *dumpraw, int *useanalysiscfgid, int *usereceivercfgid,
                          int *userecordercfgid, int *usesplittercfgid) {
 //-------------------------------------------------------------------------
   int nargs=0,i;
@@ -222,7 +224,7 @@ int process_command_line(int argc, char *argv[],char **tape_device,
 			                    char *fe=ep+1;
 			                    memset(trigger_file_path,0,sizeof(trigger_file_path));
 			                    while (isgraph(*(fe++))) trigger_file_path[fe-ep-2]=*fe ;
-                          } else if (!strncmp(argv[i],"-alfa",MAX(ep-argv[i],3))) {
+                          } else if (!strncmp(argv[i],"-alfa",MAX(ep-argv[i],4))) {
 			                    sscanf(ep+1,"%d,%d",beam,pol);
 			                    if (((*beam<0) || (*beam>6)) ||
 			                        ((*pol<0) || (*pol>1))) {
@@ -237,6 +239,13 @@ int process_command_line(int argc, char *argv[],char **tape_device,
 				                    exit(EXIT_FAILURE);
 		                        }
 			                    *gbt=1;
+                          } else if (!strncmp(argv[i],"-parkes",MAX(ep-argv[i],6))) {
+			                    sscanf(ep+1,"%d,%d",channel,pol);
+			                    if (*pol<0 || *pol>1) {
+                                    log_messages.printf(SCHED_MSG_LOG::MSG_CRITICAL,"Parkes receivers must be specified with a channel and polarization (0-1), i.e. -parkes=0,1\n");
+				                    exit(EXIT_FAILURE);
+		                        }
+			                    *parkes=1;
                           } else if (!strncmp(argv[i],"-iterations",MAX(ep-argv[i],2))) {
 			    sscanf(ep+1,"%d",iters);
 			  } else if (!strncmp(argv[i],"-startblock",MAX(ep-argv[i],2))) {
@@ -283,7 +292,11 @@ int process_command_line(int argc, char *argv[],char **tape_device,
   if (! *projectdir) return (1);
   if (! *tape_device) return (1);
   if (*gbt && !*raw_bit_depth) {
-    log_messages.printf(SCHED_MSG_LOG::MSG_CRITICAL,"GBT data requires a bit depth : -rawbitdepth=n\n", gbt);
+    log_messages.printf(SCHED_MSG_LOG::MSG_CRITICAL,"GBT data requires a bit depth : -rawbitdepth=n\n");
+    exit(EXIT_FAILURE);
+  }
+  if (*parkes && !*raw_bit_depth) {
+    log_messages.printf(SCHED_MSG_LOG::MSG_CRITICAL,"Parkes data requires a bit depth : -rawbitdepth=n\n");
     exit(EXIT_FAILURE);
   }
 
@@ -581,25 +594,34 @@ int main(int argc, char *argv[]) {
   int good_read;
   long num_blocks_read;
   int vflag;
-  int file_type = 0;        // default to dr2 for now
+  int file_type = dr2;        	// default to dr2 for now
+  int guppi_type = guppi_gbt;  	// default to guppi_gbt for now
   int beamchan;
 
   /* Process command line arguments */
   if (process_command_line(argc,argv,&tape_device,&norewind,&startblock,&resumetape,
                            &nodb,&dataclass,&atnight,&max_wus_ondisk,&projectdir,&iters,
-			               &beam,&pol,&alfa,&gbt,&channel,&raw_bit_depth,&dumpsubband,
+			               &beam,&pol,&alfa,&gbt,&parkes,&channel,&raw_bit_depth,&dumpsubband,
                            &dumpraw, &useanalysiscfgid, &usereceivercfgid, &userecordercfgid,
                            &usesplittercfgid))  {
     fprintf(stderr,"Usage: splitter tape_device -projectdir=s [-atnight] [-nodb]\n"
     "[-xml] [-gregorian] [-resumetape | -norewind | -startblock=n] [-dataclass=n]\n"
     "[-max_wus_on_disk=n] [-iterations=n] [-trigger_file_path=filename]\n"
-    "[-alfa=beam,pol] [-gbt=beam,pol -rawbitdepth=n] [-analysis_config=id] [-receiver_config=id]\n"
-    "[-recorder_config=id] [-splitter_config=id] [-dumpsubband=subband] [-dumpraw]\n");
+    "[-alfa=beam,pol | -gbt=beam,pol -rawbitdepth=n | -parkes=beam,pol -rawbitdepth=n]\n" 
+	"[-analysis_config=id] [-receiver_config=id] [-recorder_config=id] [-splitter_config=id]\n"
+    "[-dumpsubband=subband] [-dumpraw]\n");
     exit(EXIT_FAILURE);
   }
 
   if(alfa) file_type = dr2;
-  if(gbt)  file_type = guppi;
+  if(gbt) {
+	file_type = guppi;
+	guppi_type = guppi_gbt;
+  }
+  if(parkes) {
+	file_type = guppi;
+	guppi_type = guppi_parkes;
+  }
 
   // MATTL
   if (blanking_bit == SOFTWARE_BLANKING_BIT) log_messages.printf(SCHED_MSG_LOG::MSG_NORMAL,"blanking bit: %d (SOFTWARE)\n",blanking_bit);

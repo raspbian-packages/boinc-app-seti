@@ -1,7 +1,7 @@
 Description: increase buffer size.
 --- a/client/seti.cpp
 +++ b/client/seti.cpp
-@@ -1024,10 +1024,11 @@
+@@ -1024,10 +1024,11 @@ int seti_parse_data(FILE* f, ANALYSIS_STATE& state) {
    unsigned long nbytes, nsamples,samples_per_byte;
    sah_complex *data;
    unsigned long i;
@@ -14,7 +14,7 @@ Description: increase buffer size.
  #ifdef USE_MANUAL_CALLSTACK
    call_stack.enter("seti_parse_data()");
  #endif 
-@@ -1042,7 +1043,7 @@
+@@ -1042,7 +1043,7 @@ int seti_parse_data(FILE* f, ANALYSIS_STATE& state) {
    switch(swi.data_type) {
      case DATA_ASCII:
        for (i=0; i<nsamples; i++) {
