@@ -313,9 +313,7 @@ void SetCapabilities(void) {
 #ifdef USE_NEON
   if (strstr(app_init_data.host_info.p_features," neon ")) CPUCaps |= BA_NEON;
 #endif
-#if  defined(__aarch64__) 
-  CPUCaps |= BA_VFPV4 | BA_VFPV4D16 | BA_VFPV3 | BA_VFPV3D16 | BA_VFP | BA_NEON;
-#endif
+
 #endif // ANDROID
 #endif // __arm__
 #ifdef USE_MANUAL_CALLSTACK
@@ -353,7 +351,7 @@ GPStb GetPowerSpectrumFuncs[]={
      v_avxGetPowerSpectrum, BA_AVX, "v_avxGetPowerSpectrum", 
 #  endif
 #endif
-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
      vfp_GetPowerSpectrum, BA_VFP, "vfp_GetPowerSpectrum",
 #ifdef USE_NEON
      neon_GetPowerSpectrum, BA_NEON, "neon_GetPowerSpectrum",
@@ -409,7 +407,7 @@ CDtb ChirpDataFuncs[]={
      avx_ChirpData_d, BA_AVX, "avx_ChirpData_d", 
 #  endif
 #endif
-#if (defined(__arm__) && defined(ANDROID) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
      vfp_ChirpData, BA_VFP, "vfp_ChirpData",
 #ifdef USE_NEON
      neon_ChirpData, BA_NEON, "neon_ChirpData",
@@ -459,7 +457,7 @@ TPtb TransposeFuncs[]={
      v_avxTranspose8x8ntw_b, BA_AVX, "v_avxTranspose8x8ntw_b", 
 #  endif
 #endif
-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__arch64__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
     v_pfTranspose2, BA_VFP, "v_pfTranspose2",      
     v_pfTranspose4, BA_VFP, "v_pfTranspose4",      
     v_pfTranspose8, BA_VFP, "v_pfTranspose8",      
@@ -489,7 +487,7 @@ FolSub FoldSubs[] = {
   &AVXfold_a,    BA_AVX,
   &AVXfold_c,    BA_AVX,
 #endif
-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
   &vfpFoldMain,  BA_VFP,
 #ifdef USE_NEON
   &neonFoldMain, BA_NEON,
@@ -531,7 +529,7 @@ bool TestBoincSignalHandling() {
         __asm__ ("movl %cr4,%eax");
 #elif defined(__ppc__) || defined(__sparc__) 
         __asm__ (".long %0": : "i" (0xfeedface) );
-#elif defined(__arm__) || defined (__aarch64__)
+#elif defined(__arm__)
         __asm__ (".word 0xf7f000f0" );
 #endif
 #elif defined(_MSC_VER) && ( defined(_M_IX86) || defined(_M_X64) )
