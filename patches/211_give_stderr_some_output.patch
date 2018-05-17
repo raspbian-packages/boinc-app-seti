@@ -1,0 +1,54 @@
+Description: add some output useful for debugging.
+--- a/client/main.cpp
++++ b/client/main.cpp
+@@ -179,7 +179,7 @@
+ 
+ extern APP_INIT_DATA app_init_data;
+ 
+-int main(int argc, char** argv) {
++int main(int argc, char* argv[]) {
+   int retval = 0, i;
+   FORCE_FRAME_POINTER;
+ #ifdef USE_MANUAL_CALLSTACK
+@@ -204,7 +204,10 @@
+   bool standalone = false;
+   g_argv[0]=argv[0];
+ 
++  fprintf(stderr,"boinc-app-seti is invoked with the following arguments: \n");
++  fprintf(stderr,"--start\n");
+   for (i=1; i<argc; i++) {
++    fprintf(stderr,"  %d: '%s'\n",i,argv[i]);
+     g_argv[i]=argv[i];
+     char *p=argv[i];
+     while (*p=='-') p++;
+@@ -245,6 +248,7 @@
+ #ifdef USE_MANUAL_CALLSTACK
+   if (verbose>1) call_stack.set_verbose(true);
+ #endif /* USE_MANUAL_CALLSTACK */
++  fprintf(stderr,"--end.\n");
+ 
+   try {
+ 
+@@ -277,16 +281,22 @@
+     // Initialize BOINC
+     //
+ 
++    fprintf(stderr,"I: boinc_parse_init_data_file\n");
+     boinc_parse_init_data_file();
++    fprintf(stderr,"I: boinc_get_init_data\n");
+     boinc_get_init_data(app_init_data);
+ #ifdef BOINC_APP_GRAPHICS
++    fprintf(stderr,"I: sah_graphics_init\n");
+     sah_graphics_init(app_init_data);
+ #endif
++    fprintf(stderr,"I: boinc_init\n");
+     retval = boinc_init();
+     if (retval) {
+       SETIERROR(retval, "from boinc_init()");
+     }
++    fprintf(stderr,"I: worker\n");
+     worker();
++    fprintf(stderr,"I: end.\n");
+   }
+   catch (seti_error e) {
+     e.print();
