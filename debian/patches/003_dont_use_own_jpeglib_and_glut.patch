@@ -1,0 +1,32 @@
+Description: use the system available jpeg lib.
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -27,7 +27,7 @@
+ endif
+ 
+ 
+-SUBDIRS = $(JPEGDIR) $(IMDIR) $(GLUTDIR) $(CLIENT_SUBDIRS) $(SERVER_SUBDIRS)
++SUBDIRS = $(IMDIR) $(CLIENT_SUBDIRS) $(SERVER_SUBDIRS)
+ 
+ dist-hook:
+ 	rm -rf `find $(distdir) -name .backup -prune -o -name '*~' -o -name CVS`
+--- a/configure.ac
++++ b/configure.ac
+@@ -565,6 +565,7 @@
+ #SAH_AVX
+ have_avx=no
+ 
++AM_CONDITIONAL(USE_MY_LIBJPEG, [false])
+ AM_CONDITIONAL(USE_MY_IMAGELIBS, [false])
+ AM_CONDITIONAL(USE_MY_GLUT, [false])
+ AM_CONDITIONAL(ENABLE_TESTS, [test "${enable_tests}" = yes])
+@@ -670,9 +671,7 @@
+ AC_SUBST([CLIENT_EXTRA_LIBS])
+ 
+ AC_CONFIG_FILES([Makefile
+-                 glut/Makefile
+                  image_libs/Makefile
+-                 jpeglib/Makefile
+                  client/Makefile
+                  tools/Makefile
+                  db/Makefile

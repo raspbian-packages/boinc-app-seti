@@ -1,0 +1,29 @@
+--- boinc-app-seti.orig/configure.ac
++++ boinc-app-seti/configure.ac
+@@ -156,15 +156,18 @@
+ AC_SYS_LARGEFILE
+ ACX_PTHREAD([AC_DEFINE(HAVE_PTHREAD,1, [Have pthread])])
+ 
+-STATIC_LIB_LIST="stdc++ gcc gcc_eh gtk* gdk* gmodule gthread glib wx* tiff jpeg
+-png Xi glut socket z fftw3f"
++#STATIC_LIB_LIST="stdc++ gcc gcc_eh gtk* gdk* gmodule gthread glib wx* tiff jpeg
++#png Xi glut socket z fftw3f"
++#
++#case ${target} in
++#        *-linux*)       STATIC_LIB_LIST="${STATIC_LIB_LIST} nsl ssl crypto"
++#        ;;
++#        *-solaris*)     STATIC_LIB_LIST="${STATIC_LIB_LIST} X* ssl crypto"
++#        ;;
++#esac
+ 
+-case ${target} in
+-        *-linux*)       STATIC_LIB_LIST="${STATIC_LIB_LIST} nsl ssl crypto"
+-        ;;
+-        *-solaris*)     STATIC_LIB_LIST="${STATIC_LIB_LIST} X* ssl crypto"
+-        ;;
+-esac
++# This needs at least one word, so I'm using nolib, which isn't a lib. :-)
++STATIC_LIB_LIST="nolib"
+ 
+ # Checks for libraries.
+ CHECK_SSL

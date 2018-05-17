@@ -1,0 +1,17 @@
+<app_info>
+    <app>
+        <name>setiathome_v8</name>
+    </app>
+    <file_info>
+        <name>setiathome_v8</name>
+        <executable/>
+    </file_info>
+    <app_version>
+        <app_name>setiathome_v8</app_name>
+        <version_num>VERSION</version_num>
+        <file_ref>
+           <file_name>setiathome_v8</file_name>
+           <main_program/>
+        </file_ref>
+    </app_version>
+</app_info>
