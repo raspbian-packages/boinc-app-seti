@@ -2,7 +2,7 @@ AC_DEFUN([SAH_AVX],[
   AC_LANG_PUSH(C)
   AC_MSG_CHECKING([if compiler supports -mavx])
   save_cflags="${CFLAGS}"
-  CFLAGS="-mavx"
+  CFLAGS="${CFLAGS} -mavx"
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[return 0;])],[
   have_avx=yes
   ],[
