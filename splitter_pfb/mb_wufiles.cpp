@@ -51,6 +51,18 @@ std::vector<std::vector<unsigned char> > bin_data;
 
 extern APP_CONFIG sah_config;
 
+int get_app_id(char * appname) {
+	DB_APP app; 
+	char clause[256];
+
+	sprintf(clause, "where name='%s'", appname);
+	if(app.lookup(clause) == 0) {
+		return(app.id);
+	} else {
+		return -1;
+	}
+}
+
 int make_wu_headers(std::vector<dr2_compact_block_t> &tapebuffer, 
                     telescope_id tel, 
                     int beamchan,
@@ -422,7 +434,11 @@ void rename_wu_files() {
         db_wu.max_error_results=sah_config.max_error_results;
         db_wu.max_total_results=sah_config.max_total_results;
         db_wu.max_success_results=sah_config.max_success_results;
-        strncpy(db_wu.app_name,appname,sizeof(db_wu.app_name)-2);
+        //strncpy(db_wu.app_name,appname,sizeof(db_wu.app_name)-2);
+		if((db_wu.appid = get_app_id(appname)) == -1) {
+        	log_messages.printf(SCHED_MSG_LOG::MSG_CRITICAL,"Could not get appid\n ");
+			exit(1);
+    	}  
         if (create_work(db_wu,
                         wu_template,
                         result_template_filename,

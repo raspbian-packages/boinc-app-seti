@@ -14,4 +14,5 @@
 isnan-fix.patch
 introduce_lto.patch
 fix-arm64.patch
+sighandler-build-fix.patch
 raspbian-remove-neon-analyzeprocs

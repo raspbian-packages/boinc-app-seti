@@ -47,6 +47,10 @@
 #include <signal.h>
 #include <setjmp.h>
 
+#if defined(HAVE_SIGACTION)
+#include <stdio.h>
+#endif
+
 #ifndef MAXSIG
 
 #ifdef NSIG

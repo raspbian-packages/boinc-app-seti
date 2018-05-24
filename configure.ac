@@ -398,7 +398,7 @@ SAH_LARGEFILE_BREAKS_CXX
 SAH_HEADER_STDCXX
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
-AC_CHECK_HEADERS([mmap.h mman.h sys/mman.h fcntl.h inttypes.h limits.h memory.h alloca.h malloc.h stdlib.h string.h strings.h errno.h sys/time.h sys/types.h sys/ioctl.h sys/statvfs.h unistd.h dirent.h math.h float.h ieeefp.h floatingpoint.h complex.h fftw3.h setjmp.h signal.h mach/mach_time.h sys/param.h sys/systm.h machine/cpu.h cpu-features.h sys/cpu-features.h machine/cpu-features.h])
+AC_CHECK_HEADERS([mmap.h mman.h sys/mman.h fcntl.h inttypes.h limits.h memory.h alloca.h malloc.h stdlib.h string.h strings.h errno.h sys/time.h sys/types.h sys/ioctl.h sys/statvfs.h unistd.h dirent.h math.h float.h ieeefp.h floatingpoint.h complex.h fftw3.h setjmp.h signal.h mach/mach_time.h sys/param.h sys/systm.h machine/cpu.h sys/syscall.h cpu-features.h sys/cpu-features.h machine/cpu-features.h linux/perf_event.h])
 save_cxxflags="${CXXFLAGS}"
 save_cppflags="${CPPFLAGS}"
 CXXFLAGS="${CXXFLAGS} -msse3"
@@ -630,7 +630,7 @@ AH_TOP([
 #ifndef _SAH_CONFIG_H_
 #define _SAH_CONFIG_H_
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(ANDROID)
 #define _POSIX_C_SOURCE 1
 #endif
 

@@ -271,7 +271,7 @@ void SetCapabilities(void) {
 #elif defined(USE_ALTIVEC)
   CPUCaps |= BA_ALTVC;
 
-#elif defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+#elif (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
 
 #if defined(ANDROID) ||  defined(__linux__)
   // if strlen(p_features) is 0 or p_features doesn't contain "vfp" assume

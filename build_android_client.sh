@@ -7,13 +7,15 @@
 # Script to compile various BOINC libraries for Android to be used
 # by science applications
 
-#for targetarch in armv6-soft armv6-vfp armv6-neon armv7-neon armv7-vfpv3 armv7-vfpv4 armv7-vfpv3d16 thumb-vfpv3d16
-for targetarch in armv6-vfp armv6-neon
+for pie in yes no ; do
+for targetarch in armv6-vfp armv6-neon armv7-neon armv7-vfpv3 armv7-vfpv4 armv7-vfpv3d16 
+#for targetarch in armv6-vfp armv6-neon
 do
 fpabi="-mfloat-abi=softfp"
 configargs=""
 cpuarch=armv7-a
 tune=cortex-a9
+LIBSTDCPP=$targetarch/libstdc++.a
 case $targetarch in
         armv6-soft) 
           fpabi="-mfloat-abi=soft"
@@ -66,7 +68,7 @@ export ANDROIDTC="/usr/arm-linux-androideabi"
 export TCBINARIES="$ANDROIDTC/bin"
 export TCINCLUDES="$ANDROIDTC/arm-linux-androideabi"
 export TCSYSROOT="$ANDROIDTC/sysroot"
-export STDCPPTC="$TCINCLUDES/lib/libstdc++.a"
+export STDCPPTC="$TCINCLUDES/lib/$LIBSTDCPP"
 
 export CROSS_PREFIX=arm-linux-androideabi
 export ac_cv_host=${CROSS_PREFIX}
@@ -81,13 +83,22 @@ export AR=${CROSS_PREFIX}-ar
 export STRIP=${CROSS_PREFIX}-strip
 export RANLIB=${CROSS_PREFIX}-ranlib
 
-export CFLAGS="--sysroot=$TCSYSROOT -DANDROID -DDECLARE_TIMEZONE -Wall -O3 -fomit-frame-pointer -march=${cpuarch} -I$TCSYSROOT/usr/include ${fpu} ${fpabi}"
+export CFLAGS="--sysroot=$TCSYSROOT -DANDROID -DDECLARE_TIMEZONE -Wall -O3 -fomit-frame-pointer -march=${cpuarch} -I$TCSYSROOT/usr/include ${fpu} ${fpabi}" 
 export CXXFLAGS="--sysroot=$TCSYSROOT -DANDROID -Wall -funroll-loops -fexceptions -O3 -fomit-frame-pointer -march=${cpuarch} -I$TCSYSROOT/usr/include ${fpu} ${fpabi}"
 export CCASFLAGS="${CFLAGS}"
 export LDFLAGS="-static-libstdc++ -static-libgcc -L$TCINCLUDES/lib/${targetarch} -L$TCSYSROOT/usr/lib -L$TCINCLUDES/lib -llog -lstdc++"
-export LIBS="/usr/arm-linux-androideabi/arm-linux-androideabi/lib/libstdc++.a"
+export LIBS="$STDCPPTC"
 export PKG_CONFIG_SYSROOT_DIR=$TCSYSROOT
 export PKG_CONFIG_PATH=$CURL_DIR/lib/pkgconfig:$OPENSSL_DIR/lib/pkgconfig
+if [ $pie = "yes" ] ; then
+  export CFLAGS="${CFLAGS} -fPIE"
+  export CXXFLAGS="${CXXFLAGS} -fPIE"
+  export CCASFLAGS="${CCASFLAGS} -fPIE"
+  export LDFLAGS="${LDFLAGS} -fPIE -pie"
+  export PIEEXT=""
+else
+  export PIEEXT="-nopie"
+fi
 
 if [ -n "$COMPILEBOINC" ]; then
 echo "==================building Libraries from $BOINC=========================="
@@ -101,17 +112,20 @@ if [ -n "$CONFIGURE" ]; then
 /bin/rm config.cache
 if ! ./configure -C --host=${ac_cv_host} --prefix="${ANDROIDTC}/arm-linux-androideabi" --exec-prefix="${ANDROIDTC}/arm-linux-androideabi" --with-boinc-platform="arm-android-linux-gnu" --with-ssl=$TCINCLUDES --disable-graphics --disable-server $configargs
 then
+  sleep 60 
   break
 fi
 fi
 cd client
-if ! make ; then
+if ! make -j 14 ; then
   break
 fi
 pwd
-source ./working_collect2_line_for_android_$targetarch
-cp seti_boinc setiathome_7.28_arm-android-linux-gnu__$targetarch
+#source ./working_collect2_line_for_android_$targetarch
+cp seti_boinc setiathome_8.00_arm-android-linux-gnu__${targetarch}${PIEEXT}
+cp hires_timer_test hires_timer_test__${targetarch}${PIEEXT}
 cd ..
 echo "=============================BOINC done============================="
 fi
+done
 done

@@ -37,6 +37,7 @@
 
 // $Id: hires_timer.cpp,v 1.1.2.6 2006/09/07 00:26:56 korpela Exp $
 
+#include "sah_config.h"
 #include "sighandler.h"
 #include "hires_timer.h"
 #include "diagnostics.h"
@@ -65,6 +66,10 @@
 #ifdef HAVE_MACHINE_CPU_H
 #include <machine/cpu.h>
 #endif
+#ifdef HAVE_LINUX_PERF_EVENT_H
+#include <linux/perf_event.h>
+#endif
+
 
 #if _MSC_VER >= 1400
 #include "intrin.h"  // include intrinsic assembly functions
@@ -72,6 +77,11 @@
 
 #ifdef _WIN32
 #include "windows.h"
+#endif
+
+#ifdef HAVE_LINUX_PERF_EVENT_H
+static int fd_dev=-1;
+static struct perf_event_attr attr;
 #endif
 
 
@@ -198,6 +208,17 @@ static inline tick_t get_ticks() {
   return __rdtsc();
 }
 
+#elif defined(HAVE_LINUX_PERF_EVENT_H)
+static inline tick_t get_ticks() {
+ int64_t result = 0;
+ int i=0;
+ while (read(fd_dev, &result, sizeof(result)) < sizeof(result)) {
+   i++;
+   if (i==100) raise(SIGILL);
+ }
+ return result;
+}
+
 #elif defined(HAVE_CLOCK_GETTIME)
 
 #if defined(CLOCK_PROCESS_CPUTIME_ID)
@@ -231,10 +252,23 @@ static inline tick_t get_ticks() {
 }
 #endif
 
+
 hires_timer::hires_timer() : rollover(0),last_ticks(0),start_time(0.0) {
+#ifdef HAVE_LINUX_PERF_EVENT_H
+  if (fd_dev == -1) {;
+    attr.type = PERF_TYPE_HARDWARE;
+#ifdef PERF_COUNT_HW_REF_CPU_CYCLES
+    attr.config = PERF_COUNT_HW_REF_CPU_CYCLES;
+#else
+    attr.config = PERF_COUNT_HW_CPU_CYCLES;
+#endif
+    fd_dev = syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0);
+  }
+#endif
   if (period==0) {
     install_sighandler();
     if (setjmp(jb)) {
+      fprintf(stderr,"using fallback timer\n");
       use_fallback=1;
     } else {
       ticks();
@@ -273,12 +307,12 @@ tick_t hires_timer::ticks() {
 tick_t hires_timer::find_increment() {
   int i;
   tick_t delta=0;
-  for (i=0;i<32;i++) {
+  for (i=0;i<64;i++) {
     tick_t t1,t2=ticks();
     while ((t1=ticks()) <= t2) ; /* do nothing */
     delta+=(t1-t2);
   }
-  return (delta/32);
+  return (delta/64);
 }
 
 second_t hires_timer::find_frequency() {
@@ -313,12 +347,15 @@ int hires_timer::use_fallback;
 
 #ifdef TEST_TIMER
 #include <cstdio>
+#include <unistd.h>
 
 int main(void) {
   hires_timer t;
   t.start();
   printf("frequency:%f resolution:%f seconds:%f\n",t.frequency(),t.resolution(),t.seconds());
   while (t.elapsed() < t.resolution()) ;
+  printf("%f elapsed\n",t.elapsed());
+  while (t.elapsed() < 10.0) ; /* do nothing */
   printf("%f elapsed\n",t.stop());
   return 0;
 }

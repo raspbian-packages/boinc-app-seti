@@ -1,9 +1,30 @@
-boinc-app-seti (8.00~svn3701-1+rpi1) buster-staging; urgency=medium
+boinc-app-seti (8.00~svn3725-2+rpi1) buster-staging; urgency=medium
 
   [changes brought forward from 7.28~svn2633-3+rpi1 by Peter Michael Green <plugwash@raspbian.org> at Sun, 23 Nov 2014 15:14:28 +0000]
   * Disable neon
 
- -- Raspbian forward porter <root@raspbian.org>  Wed, 27 Sep 2017 02:09:24 +0000
+ -- Raspbian forward porter <root@raspbian.org>  Thu, 24 May 2018 13:30:04 +0000
+
+boinc-app-seti (8.00~svn3725-2) unstable; urgency=medium
+
+  * Fix arm64 build (add again the arm64 patch).
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Thu, 17 May 2018 10:09:59 +0200
+
+boinc-app-seti (8.00~svn3725-1) unstable; urgency=medium
+
+  * Upload to unstable
+  * Fix build failure due to missing stdio.h include
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 16 May 2018 20:26:24 +0200
+
+boinc-app-seti (8.00~svn3725-1~exp1) experimental; urgency=medium
+
+  * New upstream version 8.00~svn3725
+  * Bump std-version to 4.1.0, no changes required.
+  * Try to drop arm64 patch
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 15 May 2018 19:26:32 +0200
 
 boinc-app-seti (8.00~svn3701-1) unstable; urgency=medium
 

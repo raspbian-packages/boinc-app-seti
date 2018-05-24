@@ -5,7 +5,7 @@ Maintainer: Debian BOINC Maintainers <pkg-boinc-devel@lists.alioth.debian.org>
 Uploaders: Steffen Moeller <moeller@debian.org>,
            Guo Yixuan (郭溢譞) <culu.gyx@gmail.com>,
            Gianfranco Costamagna <locutusofborg@debian.org>
-Standards-Version: 4.1.0
+Standards-Version: 4.1.4
 Build-Depends: debhelper (>= 10),
                dpkg-dev (>= 1.16.1.1),
                freeglut3-dev,
