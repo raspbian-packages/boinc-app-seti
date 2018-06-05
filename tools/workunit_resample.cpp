@@ -62,7 +62,7 @@
 workunit_header header;
 
 int main(int argc, char *argv[]) {
-  char *outfile=NULL, buf[256];
+  char *outfile=NULL, buf[2560];
   struct stat statbuf;
   int nbytes,nread,nsamples;
   std::string tmpbuf("");
