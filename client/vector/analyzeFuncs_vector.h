@@ -236,7 +236,7 @@ extern int sse3_ChirpData_ak8(
 
 extern int v_vTranspose(int i, int j, float *in, float *out);
 #if defined(__i386__) || defined(__x86_64__) || defined(USE_SSE) || \
-    (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+    (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__))
 extern int v_pfTranspose2(int i, int j, float *in, float *out);
 extern int v_pfTranspose4(int i, int j, float *in, float *out);
 extern int v_pfTranspose8(int i, int j, float *in, float *out);
@@ -249,7 +249,7 @@ extern int v_vTranspose4x8ntw(int i, int j, float *in, float *out);
 extern int v_vTranspose4x16ntw(int i, int j, float *in, float *out);
 extern int v_vpfTranspose8x4ntw(int i, int j, float *in, float *out);
 #endif
-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__))
 extern int v_vfpTranspose2(int i, int j, float *in, float *out);
 #endif
 #ifdef USE_FFTWF
@@ -361,7 +361,7 @@ extern int v_avxGetPowerSpectrum(
 );
 #endif
 
-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
 #ifdef USE_NEON
 extern int neon_GetPowerSpectrum(
     sah_complex * cx_FreqData,

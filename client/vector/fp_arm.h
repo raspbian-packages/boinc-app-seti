@@ -36,7 +36,7 @@
 // work so modified without permission of the authors of those packages.
 //
 
-#if (defined(__arm__) || defined(__aarch64__))
+#if defined(__arm__) 
 #include <signal.h>
 #include <setjmp.h>
 #include "s_util.h"
@@ -125,11 +125,7 @@ inline static unsigned int restorefp() {
 
 inline void pld(void *arg1,const int arg2=0) {
     __asm__ __volatile__ (
-#ifndef __aarch64__
       "pld [%0,%1]\n"
-#else
-      "prfm PLDL1STRM,[%0,%1]\n"
-#endif
       : 
       : "r" (arg1), "Jr" (arg2)
     );
