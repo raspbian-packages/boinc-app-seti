@@ -193,7 +193,7 @@ get-orig-source:
 	cd $(origDir); \
 	EXP=/tmp/download-seti; \
 	nice="nice -5"; if [ -x /usr/bin/ionice ]; then nice="$$nice ionice -c 3"; fi ; \
-	$$nice wget -O$$EXP "https://anonscm.debian.org/cgit/pkg-boinc/scripts.git/plain/export-seti" --quiet && \
+	$$nice wget -O$$EXP "https://salsa.debian.org/pkg-boinc-team/scripts/raw/master/export-seti" --quiet && \
 	chmod +x $$EXP && $$EXP && rm -f $$EXP
 
 .PHONY: get-orig-source

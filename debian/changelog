@@ -1,9 +1,18 @@
-boinc-app-seti (8.00~svn3725-2+rpi1) buster-staging; urgency=medium
+boinc-app-seti (8.00~svn3725-3+rpi1) buster-staging; urgency=medium
 
   [changes brought forward from 7.28~svn2633-3+rpi1 by Peter Michael Green <plugwash@raspbian.org> at Sun, 23 Nov 2014 15:14:28 +0000]
   * Disable neon
 
- -- Raspbian forward porter <root@raspbian.org>  Thu, 24 May 2018 13:30:04 +0000
+ -- Raspbian forward porter <root@raspbian.org>  Wed, 20 Jun 2018 19:51:40 +0000
+
+boinc-app-seti (8.00~svn3725-3) unstable; urgency=medium
+
+  * Switch export script to salsa.d.o
+  * Update std-version to 4.1.4.1
+  * Update Homepage to https mode
+  * Update VCS fields to salsa.d.o
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 06 Jun 2018 00:03:28 +0200
 
 boinc-app-seti (8.00~svn3725-2) unstable; urgency=medium
 
