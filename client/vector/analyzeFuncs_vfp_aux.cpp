@@ -33,7 +33,7 @@
 #include <vector>
 #include <cmath>
 
-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
+#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__))
 
 
 #define INVALID_CHIRP 2e+20
@@ -199,7 +199,7 @@ static inline int vfp_subTranspose2(int x, int y, float *in, float *out) {
 #ifdef USE_MANUAL_CALLSTACK
     call_stack.enter("vfp_subTranspose2()");
 #endif
-#ifndef __aarch64__
+#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
     __asm__ __volatile__ (
         "fldmias  %2, {s4, s5}\n"
         "fldmias  %3, {s6, s7}\n"
@@ -211,8 +211,18 @@ static inline int vfp_subTranspose2(int x, int y, float *in, float *out) {
     :  
     : "r" (out), "r" (out+y), "r" (in), "r" (in+x)
     : "s3", "s4", "s5", "s6", "s7" );
-#else
-    v_pfsubTranspose<2>(in,out,x,y);
+#elif defined(__aarch64__)
+    __asm__ __volatile__ (
+        "ldp x4, x5, [%2], #16\n"
+        "ldp x6, x7, [%3], #16\n"
+        "mov x3,x6\n"
+        "mov x6,x5\n"
+        "mov x5,x3\n"
+        "stp x4, x5, [%0], #16\n"
+        "stp x6, x7, [%1], #16\n"
+        :
+        : "x" (out), "x" (out+y), "x" (in), "x" (in+x)
+        : "x3", "x4", "x5", "x6", "x7" );
 #endif
 #ifdef USE_MANUAL_CALLSTACK
     call_stack.exit();
