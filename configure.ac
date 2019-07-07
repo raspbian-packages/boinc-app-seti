@@ -565,6 +565,7 @@ SAH_FUNCS_IN_NAMESPACE([['min(0,0)'] ['max(0,0)'] ['transform((char *)0,(char *)
 #SAH_AVX
 have_avx=no
 
+AM_CONDITIONAL(USE_MY_LIBJPEG, [false])
 AM_CONDITIONAL(USE_MY_IMAGELIBS, [false])
 AM_CONDITIONAL(USE_MY_GLUT, [false])
 AM_CONDITIONAL(ENABLE_TESTS, [test "${enable_tests}" = yes])
@@ -670,9 +671,7 @@ AH_BOTTOM([
 AC_SUBST([CLIENT_EXTRA_LIBS])
 
 AC_CONFIG_FILES([Makefile
-                 glut/Makefile
                  image_libs/Makefile
-                 jpeglib/Makefile
                  client/Makefile
                  tools/Makefile
                  db/Makefile
