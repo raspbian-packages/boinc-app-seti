@@ -1,0 +1,14 @@
+<splitter_config>
+    <version>0.40</version>
+    <data_type>encoded</data_type>
+    <fft_len>256</fft_len>
+    <ifft_len>1</ifft_len>
+    <filter>polyphase</filter>
+    <window>hanning</window>
+    <samples_per_wu>1048576</samples_per_wu>
+    <highpass>0.0</highpass>
+    <blanker_filter>randomize</blanker_filter>
+    <pfb_ntaps>16</pfb_ntaps>
+    <pfb_width_factor>1.05</pfb_width_factor>
+    <wu_bits_per_sample>4</wu_bits_per_sample>
+</splitter_config>

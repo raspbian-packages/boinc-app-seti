@@ -1,0 +1,276 @@
+#! /usr/bin/perl -w
+
+# where is the data?
+# $file_dir = "/disks/thumper/raid5_d/users/seti/dr2_data/production/processing";
+$file_dir = "/home/seti/dr2_data/production/processing";
+
+# $email_list = 'jeffc@ssl.berkeley.edu mattl@ssl.berkeley.edu korpela@ssl.berkeley.edu';
+# $email_list = 'jeffc@ssl.berkeley.edu';
+$email_list = 'mattl@ssl.berkeley.edu jeffc@ssl.berkeley.edu';
+
+# num of seconds to keep files in _TO_BE_DELETED before actually deleting them
+$keep_for = 7*86400; # one week
+#$keep_for = 86400; # one day
+
+# what if we are missing beam/pol pairs out of the standard 14? should we move date to be deleted anyway?
+# 0 - no, 1 - yes;
+$delete_even_if_missing_beampols = 1;
+
+# where is seti_hsi.csh?
+$seti_hsi = "/home/boincadm/projects/sah/bin/seti_hsi.csh";
+
+# set informix env
+
+$informixdir = "/usr/local/informix";
+$currentpath = $ENV{"PATH"};
+$currentldlp = $ENV{"LD_LIBRARY_PATH"};
+$ENV{"INFORMIXDIR"}="${informixdir}";
+$ENV{"INFORMIXSERVER"}="sah_master_tcp";
+$ENV{"ONCONFIG"}="onconfig.sah_master";
+$ENV{"PATH"}="${informixdir}/bin:${currentpath}";
+$ENV{"LD_LIBRARY_PATH"}="${informixdir}/lib:${informixdir}/lib/esql:${currentldlp}";
+
+# if --check_only flag is specified, do "check only" for current directory, ignoring dot files, etc.
+# basically just check for existence at HPSS, and if all 14 tapes are in science db and
+# mail us the results without moving/deleting anything.
+
+# if --not_at_hpss flag is specified, this supercedes --check_only - and only outputs what files
+# are here at the lab and fully split/processed, but not yet copied to HPSS
+
+# if --ignore_matching_sizes is specified, ignore if files don't match in size - delete anyway if
+# otherwise deleteable
+
+# if --dir flag is specified, go into that file_dir instead of default file_dir
+
+sub is_ap_doing_anything {
+    my $chkfile = $_[0];
+    if (-f "${chkfile}.completely_done_ap") { return 0; } # it's done - so better not be doing anything
+    if (-f "${chkfile}.completely_done_with_errors_ap") { return 0; } # it's done - so better not be doing anything
+    @aplist = `/bin/ls *${chkfile}*_ap.* 2>&1 | /bin/grep -v "No such"`;
+    if (scalar(@aplist) > 0) { return 1; } 
+    return 0;
+}
+
+$check_only = 0;
+$not_at_hpss = 0;
+$ignore_matching_sizes = 0;
+while ($arg = shift) {
+  if ($arg eq "--check_only") {
+    $file_dir = `pwd`;
+    chomp $file_dir;
+    $check_only = 1;
+    }
+  elsif ($arg eq "--not_at_hpss") {
+    $not_at_hpss = 1;
+    }
+  elsif ($arg eq "--ignore_matching_sizes") {
+    $ignore_matching_sizes = 1;
+    }
+  elsif ($arg eq "--dir") {
+    $file_dir = shift;
+    }
+  else {
+    print "splitter_janitor [--dir file_dir] [--check_only|--not_at_hpss]\n";
+    exit(1);
+    }
+  }
+
+# get data file list
+
+if (! -d $file_dir) { 
+  print "no such directory: $file_dir\n";
+  exit(1);
+  }
+chdir $file_dir;
+undef @file_list;
+open (LS,"/bin/ls . |");
+while (<LS>) { 
+  $thisfile = $_; chomp $thisfile;
+  if (/^[0-9][0-9][a-z][a-z][0-9][0-9][a-z][a-z]$/) { push @file_list, $_ }
+  }
+close (LS);
+chomp @file_list;
+
+$message = "Splitter Janitor Results:\n";
+if ($check_only == 1) {
+  $message .= "(doing check on data files in: $file_dir)\n";
+  }
+
+# is HPSS unavailable? if so, set warning, and undefine file_list and set check_only == 1
+# in order to go right to mail at end (don't care if we're doing not_at_hpss check)
+
+if ($not_at_hpss == 0) {
+  $check_hpss = `$seti_hsi --check`;
+  chomp $check_hpss;
+  if ($check_hpss eq "hpss is down") {
+    undef @file_list;
+    $check_only = 1;
+    $message .= "\nHPSS is currently unavailable - bailing...\n";
+    }
+  } 
+
+# moving on - main part:
+
+foreach $file (@file_list) {
+  $message .= "\n";
+  if ($not_at_hpss == 1 && 
+      ( -f "${file}.completely_done" || -f "${file}.completely_done_with_errors") &&
+      ( -f "${file}.completely_done_ap" || -f "${file}.completely_done_with_errors_ap") &&
+      ! -f "${file}.at_hpss") { 
+    print "${file}\n";
+    }
+  elsif ($not_at_hpss == 0) {
+    if (! -f "${file}.at_hpss") {
+      $hsicommand = "$seti_hsi --list $file";
+      $retval = system ($hsicommand . "> /dev/null");
+      $retval = $retval >> 8;
+      if ($retval == 0) {
+        $message .= "${file}: had no .at_hpss suffix but actually IS at HPSS - touching ${file}.at_hpss\n";
+        system ("/bin/touch ${file}.at_hpss");
+        }
+      }
+    if (( (-f "${file}.completely_done" || -f "${file}.completely_done_with_errors") &&
+          (-f "${file}.completely_done_ap" || -f "${file}.completely_done_with_errors_ap") &&
+          -f "${file}.at_hpss") || $check_only == 1) {
+      $message .= "${file}: finished processing and xfering to hpss - checking...\n";
+      $domove = 1;
+      # double check that it is at HPSS
+      $hsicommand = "$seti_hsi --list $file";
+      $retval = system ($hsicommand . "> /dev/null");
+      $retval = $retval >> 8;
+      if ($retval == 1) {
+        $message .= "WARNING: ${file}: has .at_hpss suffix but IS NOT AT HPSS!\n";
+        # $domove = 0; # just a warning... still move if need be
+        }
+      else { 
+        $message .= "${file}: is at HPSS\n";
+        # now check that local/remote file sizes match     
+        $fsize = (stat($file))[7];
+		print "DEBUG: file size: - $fsize - \n";
+        $hsifsize = `$hsicommand | awk '{print \$5}'`;
+        chomp $hsifsize;
+        if ($fsize != $hsifsize && !$ignore_matching_sizes) {
+          $message .= "${file}: local size: $fsize HPSS size: $hsifsize -- DO NOT MATCH\n";
+          $domove = 0;
+          if (($hsifsize - $fsize) <= (134742016 * 5)) { # due to ragged files/software blanking - off by less then five buffers
+            $message .= "${file}: ... but the HSI size is <= 134742016 x 5 bytes (five buffers) different\n";
+            $message .= "${file}: ... we will assume due to ragged files/etc. and flag it as okay\n";
+            $domove = 1;
+            }
+          }
+        else { $message .= "${file}: local size: $fsize and HPSS size: $hsifsize match\n"; }
+        }
+      # final check - scan science database to make sure 
+      $dbcount = `echo "database sah2; select count(name) from tape where name = '${file}';" | dbaccess -e - 2>&1 | tail --l=+8 | head -1 | awk '{print \$1}'`;
+      chomp $dbcount;
+      if ($dbcount != 14) {
+        $message .= "${file}: multibeam does not have 14 entries in the tape table!\n";
+        if ($delete_even_if_missing_beampols == 0) { # i.e. if we want to keep tapes around with missing beam/pol entries, then...
+          $domove = 0;
+          }
+        }
+      else { $message .= "${file}: has all 14 entries in the tape table\n"; }
+      if ($domove == 1) { 
+        if ($check_only == 1) {
+          $message .= "${file}: completely processed by multibeam and at HPSS\n";
+          }
+        else {
+          $moveto = "./_TO_BE_DELETED";
+          if (! (-f "${file}.completely_done_ap" ||
+                 -f "${file}.completely_done_with_errors_ap") ) { 
+            $message .= "${file}: astropulse not yet finished processing\n";
+            $domove = 0;
+            }
+          else {
+            # if (-f "${file}.completely_done_with_errors_ap") { $moveto = "./_COMPLETELY_DONE_WITH_ERRORS"; }
+            if (-f "${file}.completely_done_with_errors_ap") { $moveto = "./_TO_BE_DELETED"; }
+            }
+          if (! (-f "${file}.completely_done" ||
+                 -f "${file}.completely_done_with_errors") ) { 
+            $message .= "${file}: multibeam not yet finished processing\n";
+            $domove = 0;
+            }
+          else {
+            # if (-f "${file}.completely_done_with_errors") { $moveto = "./_COMPLETELY_DONE_WITH_ERRORS"; }
+            if (-f "${file}.completely_done_with_errors") { $moveto = "./_TO_BE_DELETED"; }
+            }
+          if ($domove == 1) {
+            $thisdate = `/bin/date "+%F-%T"`;
+            chomp $thisdate;
+            if (-f "${file}.completely_done") { system ("/bin/mv ${file}.completely_done ./_COMPLETELY_DONE_HISTORY/${file}.completely_done.${thisdate}"); }
+            if (-f "${file}.completely_done_ap") { system ("/bin/mv ${file}.completely_done_ap ./_COMPLETELY_DONE_HISTORY/${file}.completely_done_ap.${thisdate}"); }
+            if (-f "${file}.completely_done_with_errors") { system ("/bin/mv ${file}.completely_done_with_errors ./_COMPLETELY_DONE_HISTORY/${file}.completely_done_with_errors.${thisdate}"); }
+            if (-f "${file}.completely_done_with_errors_ap") { system ("/bin/mv ${file}.completely_done_with_errors_ap ./_COMPLETELY_DONE_HISTORY/${file}.completely_done_with_errors_ap.${thisdate}"); }
+            system ("/bin/mv ${file} $moveto");
+            system ("/bin/mv ${file}.* $moveto");
+            $message .= "${file}: astropulse/multibeam completely done and at HPSS - moved into $moveto\n";
+            } # end if $domove == 1
+          } # end if $check_only == 1
+        } # end if $domove = 1
+      } # end if file completely done
+    else {
+      $message .= "${file}: not finished processing/xfering to hpss yet\n";
+      if (! (-f "${file}.completely_done" || -f "${file}.completely_done_with_errors") ) {
+        $message .= "    ${file}: multibeam not yet finished processing\n";
+        }
+      if (! (-f "${file}.completely_done_ap" || -f "${file}.completely_done_with_errors_ap") ) {
+        $message .= "    ${file}: astropulse not yet finished processing\n";
+        }
+      if (! (-f "${file}.at_hpss")) {
+        $message .= "    ${file}: no .at_hpss file - not finished xfering?\n";
+        }
+      }
+    }
+  }
+
+
+# only bother with the actual file deleting if check_only == 0 && not_at_hpss == 0
+
+if ($not_at_hpss == 1) { exit (0); }
+
+if ($check_only == 0) {
+
+  if ($message ne "") { $message .= "\n"; } # if needed skip a line in case there's more
+  
+  chdir "./_TO_BE_DELETED";
+  undef @del_file_list;
+  open (LS,"/bin/ls . |");
+  while (<LS>) {
+    $thisfile = $_; chomp $thisfile;
+    if (/^[0-9][0-9][a-z][a-z][0-9][0-9][a-z][a-z]$/) { push @del_file_list, $_ }
+    }
+  close (LS);
+  chomp @del_file_list;
+  
+  foreach $del_file (@del_file_list) {
+    if (-l $del_file) {
+      $message .= "${del_file}: is a symbolic link.. skipping..\n";
+      }
+    else {
+      $cdmtime = (stat("${del_file}.completely_done"))[9];
+      $ahmtime = (stat("${del_file}.at_hpss"))[9];
+      # print "${del_file} $cdmtime $ahmtime\n";
+      $now = time();
+      if (($now - $cdmtime) > $keep_for && ($now - $ahmtime) > $keep_for) {
+        system ("/bin/rm -f ${del_file}*");
+        $cdmdelta = ($now - $cdmtime);
+        $ahmdelta = ($now - $ahmtime);
+        $message .= "${del_file}: finished splitting $cdmdelta seconds ago, copied to HPSS $ahmdelta seconds ago - deleting!\n";
+        }
+      }
+    }
+
+  }
+
+# send mail!
+
+if ($message ne "") {  
+  open(MAIL, "|/usr/sbin/sendmail -tv");
+  print MAIL "To: ${email_list}\n";
+  print MAIL 'From: seti@ssl.berkeley.edu' . "\n";
+  print MAIL "Subject: splitter_janitor report\n\n";
+  print MAIL "$message";
+  close(MAIL);
+  }
+
+exit (0);
