@@ -66,8 +66,8 @@
 
 // Write a SETI work unit header to a file
 
-char *receivers[]={"invalid","synthetic","ao1420"};
-char *datatypes[]={"invalid","ascii","encoded","sun_binary"};
+const char *const receivers[]={"invalid","synthetic","ao1420"};
+const char *const datatypes[]={"invalid","ascii","encoded","sun_binary"};
 
 SETI_WU_INFO::SETI_WU_INFO(const workunit &w) :
     track_mem<SETI_WU_INFO>("SETI_WU_INFO"),
