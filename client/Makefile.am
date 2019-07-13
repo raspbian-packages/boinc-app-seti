@@ -72,7 +72,6 @@ seti_boinc_SOURCES = \
     vector/analyzeFuncs_avx.cpp \
     vector/analyzeFuncs_x86_64.cpp \
     vector/analyzeFuncs_altivec.cpp \
-    vector/analyzeFuncs_neon.S \
     vector/analyzeFuncs_vfp.S \
     vector/analyzeFuncs_vfp_aux.cpp \
     vector/x86_float4.cpp \
