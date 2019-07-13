@@ -1,0 +1,162 @@
+Description: Fix arm64 build, pld instruction seems to be not available there.
+Author: Gianfranco Costamagna <locutusofborg@debian.org>
+
+Index: boinc-app-seti/client/vector/analyzeFuncs_vfp_aux.cpp
+===================================================================
+--- boinc-app-seti.orig/client/vector/analyzeFuncs_vfp_aux.cpp
++++ boinc-app-seti/client/vector/analyzeFuncs_vfp_aux.cpp
+@@ -33,7 +33,7 @@
+ #include <vector>
+ #include <cmath>
+ 
+-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__))
+ 
+ 
+ #define INVALID_CHIRP 2e+20
+@@ -199,7 +199,7 @@
+ #ifdef USE_MANUAL_CALLSTACK
+     call_stack.enter("vfp_subTranspose2()");
+ #endif
+-#ifndef __aarch64__
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+     __asm__ __volatile__ (
+         "fldmias  %2, {s4, s5}\n"
+         "fldmias  %3, {s6, s7}\n"
+@@ -211,8 +211,18 @@
+     :  
+     : "r" (out), "r" (out+y), "r" (in), "r" (in+x)
+     : "s3", "s4", "s5", "s6", "s7" );
+-#else
+-    v_pfsubTranspose<2>(in,out,x,y);
++#elif defined(__aarch64__)
++    __asm__ __volatile__ (
++        "ldp x4, x5, [%2], #16\n"
++        "ldp x6, x7, [%3], #16\n"
++        "mov x3,x6\n"
++        "mov x6,x5\n"
++        "mov x5,x3\n"
++        "stp x4, x5, [%0], #16\n"
++        "stp x6, x7, [%1], #16\n"
++        :
++        : "x" (out), "x" (out+y), "x" (in), "x" (in+x)
++        : "x3", "x4", "x5", "x6", "x7" );
+ #endif
+ #ifdef USE_MANUAL_CALLSTACK
+     call_stack.exit();
+Index: boinc-app-seti/client/vector/analyzeFuncs_vector.cpp
+===================================================================
+--- boinc-app-seti.orig/client/vector/analyzeFuncs_vector.cpp
++++ boinc-app-seti/client/vector/analyzeFuncs_vector.cpp
+@@ -313,9 +313,7 @@
+ #ifdef USE_NEON
+   if (strstr(app_init_data.host_info.p_features," neon ")) CPUCaps |= BA_NEON;
+ #endif
+-#if  defined(__aarch64__) 
+-  CPUCaps |= BA_VFPV4 | BA_VFPV4D16 | BA_VFPV3 | BA_VFPV3D16 | BA_VFP | BA_NEON;
+-#endif
++
+ #endif // ANDROID
+ #endif // __arm__
+ #ifdef USE_MANUAL_CALLSTACK
+@@ -353,7 +351,7 @@
+      v_avxGetPowerSpectrum, BA_AVX, "v_avxGetPowerSpectrum", 
+ #  endif
+ #endif
+-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+      vfp_GetPowerSpectrum, BA_VFP, "vfp_GetPowerSpectrum",
+ #ifdef USE_NEON
+      neon_GetPowerSpectrum, BA_NEON, "neon_GetPowerSpectrum",
+@@ -409,7 +407,7 @@
+      avx_ChirpData_d, BA_AVX, "avx_ChirpData_d", 
+ #  endif
+ #endif
+-#if (defined(__arm__) && defined(ANDROID) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+      vfp_ChirpData, BA_VFP, "vfp_ChirpData",
+ #ifdef USE_NEON
+      neon_ChirpData, BA_NEON, "neon_ChirpData",
+@@ -459,7 +457,7 @@
+      v_avxTranspose8x8ntw_b, BA_AVX, "v_avxTranspose8x8ntw_b", 
+ #  endif
+ #endif
+-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__arch64__)
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+     v_pfTranspose2, BA_VFP, "v_pfTranspose2",      
+     v_pfTranspose4, BA_VFP, "v_pfTranspose4",      
+     v_pfTranspose8, BA_VFP, "v_pfTranspose8",      
+@@ -489,7 +487,7 @@
+   &AVXfold_a,    BA_AVX,
+   &AVXfold_c,    BA_AVX,
+ #endif
+-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+   &vfpFoldMain,  BA_VFP,
+ #ifdef USE_NEON
+   &neonFoldMain, BA_NEON,
+@@ -531,7 +529,7 @@
+         __asm__ ("movl %cr4,%eax");
+ #elif defined(__ppc__) || defined(__sparc__) 
+         __asm__ (".long %0": : "i" (0xfeedface) );
+-#elif defined(__arm__) || defined (__aarch64__)
++#elif defined(__arm__)
+         __asm__ (".word 0xf7f000f0" );
+ #endif
+ #elif defined(_MSC_VER) && ( defined(_M_IX86) || defined(_M_X64) )
+Index: boinc-app-seti/client/vector/analyzeFuncs_vector.h
+===================================================================
+--- boinc-app-seti.orig/client/vector/analyzeFuncs_vector.h
++++ boinc-app-seti/client/vector/analyzeFuncs_vector.h
+@@ -236,7 +236,7 @@
+ 
+ extern int v_vTranspose(int i, int j, float *in, float *out);
+ #if defined(__i386__) || defined(__x86_64__) || defined(USE_SSE) || \
+-    (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++    (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__))
+ extern int v_pfTranspose2(int i, int j, float *in, float *out);
+ extern int v_pfTranspose4(int i, int j, float *in, float *out);
+ extern int v_pfTranspose8(int i, int j, float *in, float *out);
+@@ -249,7 +249,7 @@
+ extern int v_vTranspose4x16ntw(int i, int j, float *in, float *out);
+ extern int v_vpfTranspose8x4ntw(int i, int j, float *in, float *out);
+ #endif
+-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__))
+ extern int v_vfpTranspose2(int i, int j, float *in, float *out);
+ #endif
+ #ifdef USE_FFTWF
+@@ -361,7 +361,7 @@
+ );
+ #endif
+ 
+-#if (defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)) || defined(__aarch64__)
++#if defined(__arm__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
+ #ifdef USE_NEON
+ extern int neon_GetPowerSpectrum(
+     sah_complex * cx_FreqData,
+Index: boinc-app-seti/client/vector/fp_arm.h
+===================================================================
+--- boinc-app-seti.orig/client/vector/fp_arm.h
++++ boinc-app-seti/client/vector/fp_arm.h
+@@ -36,7 +36,7 @@
+ // work so modified without permission of the authors of those packages.
+ //
+ 
+-#if (defined(__arm__) || defined(__aarch64__))
++#if defined(__arm__) 
+ #include <signal.h>
+ #include <setjmp.h>
+ #include "s_util.h"
+@@ -125,11 +125,7 @@
+ 
+ inline void pld(void *arg1,const int arg2=0) {
+     __asm__ __volatile__ (
+-#ifndef __aarch64__
+       "pld [%0,%1]\n"
+-#else
+-      "prfm PLDL1STRM,[%0,%1]\n"
+-#endif
+       : 
+       : "r" (arg1), "Jr" (arg2)
+     );

@@ -1,0 +1,51 @@
+Description: Reduce missing const build warnings.
+--- a/client/main.cpp
++++ b/client/main.cpp
+@@ -113,7 +113,7 @@
+ }
+ 
+ void print_error(int e) {
+-  char* p;
++  const char* p;
+ #ifdef USE_MANUAL_CALLSTACK
+   call_stack.enter("print_error()");
+ #endif /* USE_MANUAL_CALLSTACK */
+--- a/client/s_util.cpp
++++ b/client/s_util.cpp
+@@ -283,11 +283,11 @@
+   return 0;
+ }
+ 
+-char* error_string(int e) {
++const char* error_string(int e) {
+ #ifdef USE_MANUAL_CALLSTACK
+   call_stack.enter("error_string()");
+ #endif 
+-  char* p;
++  const char* p;
+   static char buf[256];
+ 
+   switch(e) {
+--- a/client/s_util.h
++++ b/client/s_util.h
+@@ -150,6 +150,6 @@
+     float float_element[], unsigned char char_element[],
+     long num_elements, float scale_factor
+   );
+-extern char* error_string(int);
++extern const char* error_string(int);
+ 
+ #endif
+--- a/client/seti_header.cpp
++++ b/client/seti_header.cpp
+@@ -66,8 +66,8 @@
+ 
+ // Write a SETI work unit header to a file
+ 
+-char *receivers[]={"invalid","synthetic","ao1420"};
+-char *datatypes[]={"invalid","ascii","encoded","sun_binary"};
++const char *const receivers[]={"invalid","synthetic","ao1420"};
++const char *const datatypes[]={"invalid","ascii","encoded","sun_binary"};
+ 
+ SETI_WU_INFO::SETI_WU_INFO(const workunit &w) :
+     track_mem<SETI_WU_INFO>("SETI_WU_INFO"),
